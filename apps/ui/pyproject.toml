@@ -1,0 +1,13 @@
+# pyproject.toml
+[project]
+name = "o9-control-head"
+version = "0.1.0"
+description = "Raspberry Pi control-head UI using PySide6 + QML"
+requires-python = ">=3.10"
+dependencies = [
+  "PySide6>=6.7",
+  "pyserial>=3.5"
+]
+
+[tool.pdm]
+# (Optional) if you use pdm/uv/poetry; otherwise just `pip install -r` with a reqs file

@@ -1,0 +1,90 @@
+# =========================================
+# Python
+# =========================================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+.eggs/
+build/
+dist/
+*.spec
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+pip-wheel-metadata/
+*.manifest
+*.cache
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs / Runtime
+*.log
+*.bak
+*.tmp
+*.pid
+*.gz
+
+# =========================================
+# Qt / PySide6
+# =========================================
+# Generated QML cache / compilation
+qmlcache/
+*.qmlc
+*.jsc
+*.qmltypes
+
+# PyInstaller / Frozen build output
+_o9_control_head*
+/output/
+/release/
+/deploy/
+
+# =========================================
+# OS / Platform
+# =========================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~ 
+.nfs*
+
+# Windows
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# =========================================
+# Project specific
+# =========================================
+# Local runtime / systemd / configs
+o9.service
+config.yaml
+local.env
+.env
+
+# Data / test captures
+test_output/
+captures/
+logs/
+serial_dumps/
+
+# =========================================
+# Optional: JetBrains / VS / others
+# ======================================
