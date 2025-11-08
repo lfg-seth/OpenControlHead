@@ -2,11 +2,12 @@
 from __future__ import annotations
 import sys
 from pathlib import Path
-from PySide6.QtCore import QUrl, QObject, Slot, Signal, Qt
+from PySide6.QtCore import QUrl, QObject, Slot, Signal, Qt, QSize
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 from .serial_worker import SerialWorker
 import signal
+import platform
 
 APP_DIR = Path(__file__).resolve().parents[1]
 QML_DIR = APP_DIR / "qml"
@@ -41,19 +42,28 @@ def make_engine() -> tuple[QQmlApplicationEngine, Bridge, SerialWorker]:
     if not engine.rootObjects():
         raise SystemExit("Failed to load QML")
 
-    # Force frameless, full-screen
     root = engine.rootObjects()[0]
     try:
-        root.setFlags(Qt.FramelessWindowHint | Qt.Window)
-        root.showFullScreen()
+        if platform.system() == "Linux":
+            # Frameless and full screen on Linux
+            root.setFlags(Qt.FramelessWindowHint | Qt.Window)
+            root.showFullScreen()
+        else:
+            # Fixed 800x480 window on Windows (non-resizable)
+            root.setFlags(Qt.Window)
+            root.setMinimumSize(QSize(800, 480))
+            root.setMaximumSize(QSize(800, 480))
+            root.resize(800, 480)
+            root.show()
     except Exception:
         pass
-
     return engine, bridge, serial
 
 
 def main() -> None:
     app = QGuiApplication(sys.argv)
+    if platform.system() == "Linux":
+        app.setOverrideCursor(Qt.BlankCursor)
     engine, _, _ = make_engine()
     signal.signal(signal.SIGINT, signal.SIG_DFL)  # 👈 catch Ctrl-C
     # Keep Python refs alive

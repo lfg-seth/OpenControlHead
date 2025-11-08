@@ -5,6 +5,7 @@ import threading
 import time
 import serial  # pyserial
 from PySide6.QtCore import QObject, Signal, QThread
+import re
 
 
 def _default_port() -> str | None:
@@ -77,10 +78,13 @@ class SerialWorker(QObject):
 
     def _on_line(self, line: str):
         # Expect lines like: BTN GP9 DOWN  or BTN GP9 UP
-        parts = line.split(",")
-        if len(parts) >= 3 and parts[0] == "BTN":
-            name, state = parts[1], parts[2]
+        parts = re.split(r'\s+', line)
+        # Format B: new "PRESS  NUM_4  row=2 col=1"
+        if len(parts) >= 2 and parts[0] in ("PRESS", "RELEASE"):
+            state = parts[0]
+            name = parts[1]
+            pressed = (state == "PRESS")
             print(f"[SerialWorker] Button {name} is {state}")
-            self.buttonEvent.emit(name, state.upper() == "DOWN")
-        else:
-            print(f"[SerialWorker] RX: {line}")
+            self.buttonEvent.emit(name, pressed)
+            return
+        print(f"[SerialWorker] RX (unhandled): {line}")

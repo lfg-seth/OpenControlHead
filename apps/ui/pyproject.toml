@@ -3,7 +3,7 @@
 name = "o9-control-head"
 version = "0.1.0"
 description = "Raspberry Pi control-head UI using PySide6 + QML"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.13"
 dependencies = [
   "PySide6>=6.7",
   "pyserial>=3.5"
