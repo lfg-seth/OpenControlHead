@@ -1,0 +1,189 @@
+# ============================================================
+# o9 Control Head Project - .gitignore
+# Covers Qt/QML app, PlatformIO firmware, hardware assets, docs
+# ============================================================
+
+# ------------------------
+# OS / Editor / System Files
+# ------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+*.swp
+*.swo
+*.tmp
+*.bak
+*.orig
+*.log
+*.lock
+*.old
+*.rej
+*.sublime-workspace
+*.sublime-project
+.vscode/
+.idea/
+*.code-workspace
+
+# ------------------------
+# Python / Build Artifacts
+# ------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+*.egg-info/
+.env
+.venv
+venv/
+build/
+dist/
+*.spec
+
+# ------------------------
+# Qt / QML / C++ Builds
+# ------------------------
+*.pro.user
+*.qbs.user
+*.qbs.user.*
+*.qmlproject.user
+*.qmlproject.user.*
+*.qmake.stash
+*.moc
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles/
+Makefile
+*.o
+*.obj
+*.a
+*.lib
+*.dll
+*.so
+*.dylib
+*.exe
+*.app
+*.out
+*.ninja
+*.ninja_deps
+*.ninja_log
+cmake-build-*/
+
+# ------------------------
+# PlatformIO / Arduino Firmware
+# ------------------------
+.pio/
+.pioenvs/
+.piolibdeps/
+.piomisc/
+.pioBuild/
+.pioBuilds/
+.pio/libdeps/
+.pio/build/
+.pio/.cache/
+platformio.ini.save
+firmware/*.bin
+firmware/*.elf
+firmware/*.map
+firmware/.vscode/
+firmware/*/.vscode/
+firmware/*/.pio/
+
+# ------------------------
+# Logs / Serial Output
+# ------------------------
+serial.log
+*.trace
+*.dump
+*.hex
+*.uf2
+*.bin
+*.elf
+
+# ------------------------
+# Hardware / CAD / Fabrication
+# ------------------------
+hardware/**/autosave/
+hardware/**/cache/
+hardware/**/tmp/
+hardware/**/backup/
+hardware/**/export/
+*.bak
+*.zip
+*.tar.gz
+*.bkp
+*.fzz
+*.dsn
+*.pcbtmp
+*.sch~
+*.pcb~
+*.step1
+*.stp1
+*.3dshapes/
+*.ipr
+*.iws
+*.bak
+
+# ------------------------
+# Documentation / Output
+# ------------------------
+docs/_build/
+docs/build/
+docs/.cache/
+site/
+*.pdf
+*.aux
+*.log
+*.toc
+*.out
+*.synctex.gz
+
+# ------------------------
+# Node / Frontend (if ever added)
+# ------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ------------------------
+# Archives / Temporary Exports
+# ------------------------
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+
+# ------------------------
+# Local Configs / Credentials
+# ------------------------
+.env
+.env.local
+.env.production
+.env.development
+config.json
+config.local.json
+secrets.json
+*.pem
+*.key
+*.crt
+*.p12
+*.cer
+*.der
+
+# ------------------------
+# Custom project notes (optional)
+# ------------------------
+notes/
+scratch/
+test-output/
+TODO.txt
+*.bak.*
+*.old.*
+
+# End of file
