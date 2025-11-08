@@ -1,0 +1,1 @@
+Havnig trouble opening this with PlatformIO? Try opening just this folder in VSCode and not the top level of the repo.
