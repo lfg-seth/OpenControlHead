@@ -92,7 +92,8 @@ class GpioPinState:
     """
     index: int
     is_output: bool = False
-    level: bool = False       # True = high, False = low
+    level: bool = False       # True = high, False = low. For outputs, shows actual state.
+    target_level: Optional[bool] = None  # for outputs, shows desired state
 
 
 # ---------- PCM Device ----------
@@ -133,7 +134,7 @@ class PCMDevice:
 
     # ----- Public control API -----
 
-    def set_channel_on(self, ch: int) -> None:
+    def set_channel_on(self, channel: int) -> None:
         """
         Request: turn the given channel ON.
         Implementation should:
@@ -143,32 +144,32 @@ class PCMDevice:
         """
         ...
 
-    def set_channel_off(self, ch: int) -> None:
+    def set_channel_off(self, channel: int) -> None:
         """
         Request: turn the given channel OFF.
         """
         ...
 
-    def toggle_channel(self, ch: int) -> None:
+    def toggle_channel(self, channel: int) -> None:
         """
         Request: toggle channel state.
         Optional convenience wrapper for UI.
         """
         ...
 
-    def set_channel_pwm(self, ch: int, duty_cycle: float) -> None:
+    def set_channel_pwm(self, channel: int, duty_cycle: float) -> None:
         """
         Optionally support dimming/PWM if your hardware/protocol allows.
         duty_cycle: 0.0 - 1.0
         """
         ...
 
-    def get_channel_state(self, ch: int) -> ChannelState:
+    def get_channel_state(self, channel: int) -> ChannelState:
         """
-        Return the last-known state for channel `ch`.
+        Return the last-known state for channel `channel`.
         Does NOT necessarily cause a bus read; relies on prior updates.
         """
-        return self.channels[ch]
+        return self.channels[channel]
 
     # ----- ADC / GPIO API (scaffolding) -----
 
@@ -285,14 +286,14 @@ class PCMManager:
 
     # Convenience helpers for app/Qt:
 
-    def set_channel_on(self, node_id: int, ch: int) -> None:
+    def set_channel_on(self, node_id: int, channel: int) -> None:
         pcm = self._pcms[node_id]
-        pcm.set_channel_on(ch)
+        pcm.set_channel_on(channel)
 
-    def set_channel_off(self, node_id: int, ch: int) -> None:
+    def set_channel_off(self, node_id: int, channel: int) -> None:
         pcm = self._pcms[node_id]
-        pcm.set_channel_off(ch)
+        pcm.set_channel_off(channel)
 
-    def get_channel_state(self, node_id: int, ch: int) -> ChannelState:
+    def get_channel_state(self, node_id: int, channel: int) -> ChannelState:
         pcm = self._pcms[node_id]
-        return pcm.get_channel_state(ch)
+        return pcm.get_channel_state(channel)
