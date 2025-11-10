@@ -1,14 +1,11 @@
-// pages/LightsPage.qml
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 
 Item {
     id: lightsPage
 
-    // Injected by main.qml Loader.onLoaded
     property var rootWindow
 
-    // When rootWindow is set, configure the top bar
     onRootWindowChanged: {
         if (!rootWindow)
             return;
@@ -16,47 +13,75 @@ Item {
         rootWindow.setTopBar([
             {
                 label: "INTERIOR",
-                onClick: function () {
-                    
-                }
+                onClick: function () {}
             },
             {
                 label: "SCENES",
-                onClick: function () {
-                // e.g. open a scenes overlay or toggle mode
-                }
+                onClick: function () {}
             },
             {
                 label: "<----",
-                onClick: function () {
-                // send "all on" command via Bridge / whatever
-                }
+                onClick: function () {}
             },
             {
                 label: "<---->",
-                onClick: function () {
-                // send "all off"
-                }
+                onClick: function () {}
             },
             {
                 label: "---->",
-                onClick: function () {
-                }
+                onClick: function () {}
             }
         ]);
     }
+
     Rectangle {
+        id: contentBg
         anchors.fill: parent
         color: "#0A0A0A"
         radius: 8
         border.color: "#141414"
 
-        Text {
-            font.family: "Oxygen Mono"
-            anchors.centerIn: parent
-            text: "LIGHTS"
-            color: "#E6E6E6"
-            font.pixelSize: 36
+        Row {
+            id: contentRow
+            anchors.fill: parent       // ✅ give the Row a real size
+            anchors.margins: 20
+            spacing: 20
+
+            // Left panel (SVG placeholder)
+            Rectangle {
+                id: svgPanel
+                width: 300
+                height: parent.height  // parent = Row, which now has a height
+                color: "#222222"
+                radius: 8
+                border.color: "#333333"
+
+                Image {
+                    anchors.fill: parent
+                    source: "qrc:/assets/4runner-02.svg"
+                    fillMode: Image.PreserveAspectFit
+                    
+                    transformOrigin: Item.Center
+                }
+            }
+
+            // Right panel (controls)
+            Rectangle {
+                id: controlsPanel
+                anchors.left: svgPanel.right
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                color: "#222222"
+                radius: 8
+                border.color: "#333333"
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "Light Controls Here"
+                    color: "#FFFFFF"
+                }
+            }
         }
     }
 }

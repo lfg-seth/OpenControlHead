@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>assets/4runner-02.svg</file>
+    </qresource>
+</RCC>

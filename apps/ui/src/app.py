@@ -8,6 +8,8 @@ from PySide6.QtQml import QQmlApplicationEngine
 from .serial_worker import SerialWorker
 import signal
 import platform
+import resources_rc  # this line makes the qrc resources available
+
 
 APP_DIR = Path(__file__).resolve().parents[1]
 QML_DIR = APP_DIR / "qml"
