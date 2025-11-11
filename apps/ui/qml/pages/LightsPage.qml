@@ -49,8 +49,6 @@ Item {
 
             Rectangle {
                 id: controlsPanel
-                anchors.left: svgPanel.right
-                anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 color: "#222222"
