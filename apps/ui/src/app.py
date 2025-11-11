@@ -23,6 +23,33 @@ logger = logging.getLogger("control_head.app")
 APP_DIR = Path(__file__).resolve().parents[1]
 QML_DIR = APP_DIR / "qml"
 
+# --- hardware / logical layer ---
+pcm = PCMManager(CanInterface)
+pcm.add_pcm(node_id=1)
+pcm.add_pcm(node_id=2)
+
+switches = SwitchManager(pcm)
+
+# Register logical switches
+front_switch = switches.register_switch(
+    name="Front Lights",
+    bindings=[
+        ChannelBinding(node_id=1, channel_index=0, label="Left Grille LED"),
+        ChannelBinding(node_id=1, channel_index=1, label="Right Grille LED"),
+        ChannelBinding(node_id=2, channel_index=0, label="Bumper Lightbar"),
+    ],
+)
+front_switch.on()
+front_switch.off()
+
+horn = switches.register_switch(
+    name="Horn",
+    bindings=[
+        ChannelBinding(node_id=1, channel_index=2, label="Horn"),
+    ],
+)
+
+
 
 class QmlLogBridge(QObject):
     logAdded = Signal(str, str, str)  # level, origin, message (optional: for UI log view)
@@ -153,24 +180,6 @@ def main() -> None:
     app = QGuiApplication(sys.argv)
     if platform.system() == "Linux":
         app.setOverrideCursor(Qt.BlankCursor)
-
-    # --- hardware / logical layer ---
-    pcm = PCMManager(CanInterface)
-    pcm.add_pcm(node_id=1)
-    pcm.add_pcm(node_id=2)
-
-    switches = SwitchManager(pcm)
-
-    # Register logical switches
-    switches.register_switch(
-        name="Front Lights",
-        bindings=[
-            ChannelBinding(node_id=1, channel_index=0, label="Left Grille LED"),
-            ChannelBinding(node_id=1, channel_index=1, label="Right Grille LED"),
-            ChannelBinding(node_id=2, channel_index=0, label="Bumper Lightbar"),
-        ],
-    )
-
     engine, bridge, serial = make_engine(switches)
 
     # Log bridge for QML log view
