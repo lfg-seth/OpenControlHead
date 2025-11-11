@@ -46,18 +46,5 @@ Item {
             }
         ]);
     }
-    Loader {
-        id: pageLoader
-        anchors.top: statusBar.bottom
-        anchors.bottom: bottomGutter.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        source: "Logs.qml"
-
-        onLoaded: {
-            if (item && item.hasOwnProperty("rootWindow")) {
-                item.rootWindow = root;
-            }
-        }
-    }
+   
 }
