@@ -3,7 +3,6 @@ import QtQuick.Controls 2.15
 
 Item {
     id: lightsPage
-
     property var rootWindow
 
     onRootWindowChanged: {
@@ -11,26 +10,11 @@ Item {
             return;
 
         rootWindow.setTopBar([
-            {
-                label: "INTERIOR",
-                onClick: function () {}
-            },
-            {
-                label: "SCENES",
-                onClick: function () {}
-            },
-            {
-                label: "<----",
-                onClick: function () {}
-            },
-            {
-                label: "<---->",
-                onClick: function () {}
-            },
-            {
-                label: "---->",
-                onClick: function () {}
-            }
+            { label: "INTERIOR", onClick: function () {} },
+            { label: "SCENES",   onClick: function () {} },
+            { label: "<----",    onClick: function () {} },
+            { label: "<---->",   onClick: function () {} },
+            { label: "---->",    onClick: function () {} }
         ]);
     }
 
@@ -43,15 +27,14 @@ Item {
 
         Row {
             id: contentRow
-            anchors.fill: parent       // ✅ give the Row a real size
+            anchors.fill: parent
             anchors.margins: 20
             spacing: 20
 
-            // Left panel (SVG placeholder)
             Rectangle {
                 id: svgPanel
                 width: 300
-                height: parent.height  // parent = Row, which now has a height
+                height: parent.height
                 color: "#222222"
                 radius: 8
                 border.color: "#333333"
@@ -60,12 +43,10 @@ Item {
                     anchors.fill: parent
                     source: "qrc:/assets/4runner-02.svg"
                     fillMode: Image.PreserveAspectFit
-                    
                     transformOrigin: Item.Center
                 }
             }
 
-            // Right panel (controls)
             Rectangle {
                 id: controlsPanel
                 anchors.left: svgPanel.right
@@ -76,10 +57,24 @@ Item {
                 radius: 8
                 border.color: "#333333"
 
-                Text {
+                Column {
                     anchors.centerIn: parent
-                    text: "Light Controls Here"
-                    color: "#FFFFFF"
+                    spacing: 16
+
+                    Switch {
+                        id: frontLightsSwitch
+                        text: "Front Lights"
+                        onToggled: {
+                            // `checked` is the new state
+                            Bridge.setSwitchState("Front Lights", checked)
+                        }
+                    }
+
+                    // Example of a pure action button:
+                    Button {
+                        text: "Toggle Front Lights"
+                        onClicked: Bridge.toggleSwitch("Front Lights")
+                    }
                 }
             }
         }

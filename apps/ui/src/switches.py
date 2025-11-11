@@ -105,6 +105,12 @@ class LogicalSwitch:
         - If all ON -> all OFF.
         - Else (OFF/PARTIAL/UNKNOWN) -> all ON.
         """
+        current_state = self.get_state()
+        logger.info(f"Toggling LogicalSwitch: {self.name} from state {current_state}", extra={"origin": "switches.LogicalSwitch.toggle"})
+        if current_state == SwitchState.ON:
+            self.off()
+        else:
+            self.on()
         ...
     
     def cycle(self) -> None:
