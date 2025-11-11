@@ -2,7 +2,7 @@
 set -e  # Exit on any error
 
 # --- Config: allowed Python versions for o9-control-head ---
-PYTHON_CANDIDATES=("python3.12" "python3.11" "python3.10")
+PYTHON_CANDIDATES=("python3.13", "python3.12" "python3.11" "python3.10")
 
 # --- Resolve paths ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
