@@ -11,7 +11,9 @@ import platform
 import resources_rc  # this line makes the qrc resources available
 import logging
 from logging_setup import setup_logging
+from switches import SwitchManager, ChannelBinding
 from pcm import PCMManager, CanInterface
+
 
 root_logger = setup_logging()
 
@@ -112,13 +114,19 @@ def main() -> None:
     signal.signal(signal.SIGINT, signal.SIG_DFL)  # 👈 catch Ctrl-C
     log_bridge = QmlLogBridge()
     engine.rootContext().setContextProperty("LogBridge", log_bridge)
+    pcm = PCMManager(CanInterface)
+    pcm.add_pcm(node_id=1)
+    pcm.add_pcm(node_id=2)
+    switches = SwitchManager(pcm)
+    front_lights = switches.register_switch(
+        name="Front Lights",
+        bindings=[ChannelBinding(node_id=1, channel_index=0, label="Left Grille LED"),
+                  ChannelBinding(node_id=1, channel_index=1, label="Right Grille LED"),
+                  ChannelBinding(node_id=2, channel_index=0, label="Bumper Lightbar"),],
+    )
+    front_lights.on()
+    front_lights.off()
 
-    # Example: create PCMManager and PCMDevice instances here
-    logger.info("Creating PCMManager and PCMDevice instances", extra={"origin": "app.main"})
-    pcm_manager = PCMManager(CanInterface)
-    pcm_manager.add_pcm(node_id=1, name="Front PCM")
-    pcm_manager.add_pcm(node_id=2, name="Rear PCM")
-    logger.info("PCMManager and PCMDevice instances created and started", extra={"origin": "app.main"})
 
     app.aboutToQuit.connect(lambda: None)
     sys.exit(app.exec())

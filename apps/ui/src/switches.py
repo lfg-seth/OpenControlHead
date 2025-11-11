@@ -7,7 +7,7 @@ from enum import Enum, auto
 from typing import Dict, List, Iterable, Optional
 import logging
 
-from .pcm import PCMManager, ChannelState, ChannelHealth  # adjust import as needed
+from pcm import PCMManager, ChannelState, ChannelHealth  # adjust import as needed
 
 logger = logging.getLogger("control_head.switches")
 
@@ -70,6 +70,16 @@ class LogicalSwitch:
         """
         Turn ALL bound channels ON (as a command).
         """
+        logger.info(f"Turning ON LogicalSwitch: {self.name}", extra={"origin": "switches.LogicalSwitch.on"})
+        for binding in self._bindings:
+            pcm = self._pcm.get_pcm(binding.node_id)
+            if pcm is None:
+                logger.warning(
+                    f"PCM node {binding.node_id} not found for switch {self.name}",
+                    extra={"origin": "switches.LogicalSwitch.on"},
+                )
+                continue
+            pcm.set_channel_on(binding.channel_index)
         # Implementation will loop bindings and call PCMManager.set_channel_on(...)
         ...
 
@@ -77,6 +87,16 @@ class LogicalSwitch:
         """
         Turn ALL bound channels OFF (as a command).
         """
+        logger.info(f"Turning OFF LogicalSwitch: {self.name}", extra={"origin": "switches.LogicalSwitch.off"})
+        for binding in self._bindings:
+            pcm = self._pcm.get_pcm(binding.node_id)
+            if pcm is None:
+                logger.warning(
+                    f"PCM node {binding.node_id} not found for switch {self.name}",
+                    extra={"origin": "switches.LogicalSwitch.off"},
+                )
+                continue
+            pcm.set_channel_off(binding.channel_index)
         ...
 
     def toggle(self) -> None:

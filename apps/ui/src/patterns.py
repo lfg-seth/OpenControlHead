@@ -7,7 +7,7 @@ from enum import Enum, auto
 from typing import Dict, List, Protocol, Union, Optional
 import logging
 
-from .switches import ChannelBinding  # and/or switch names depending on chosen approach
+from switches import ChannelBinding  # and/or switch names depending on chosen approach
 
 logger = logging.getLogger("control_head.patterns")
 

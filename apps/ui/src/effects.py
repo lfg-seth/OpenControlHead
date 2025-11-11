@@ -7,9 +7,9 @@ from typing import Dict, List, Optional, Union, Iterable
 import logging
 import time
 
-from .pcm import PCMManager
-from .switches import SwitchManager, LogicalSwitch, SwitchState
-from .patterns import Pattern, PatternTarget, PatternTargetType
+from pcm import PCMManager
+from switches import SwitchManager, LogicalSwitch, SwitchState
+from patterns import Pattern, PatternTarget, PatternTargetType
 
 logger = logging.getLogger("control_head.effects")
 

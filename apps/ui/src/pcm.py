@@ -138,6 +138,14 @@ class PCMDevice:
 
     # ----- Public control API -----
 
+    def get_voltage(self) -> float:
+        """
+        Return the last-known supply voltage for this PCM.
+        """
+        logger.info(f"Getting voltage for PCM {self.name}", extra={"origin": "pcm.PCMDevice.get_voltage"})
+        # Placeholder implementation
+        return 12.0
+
     def set_channel_on(self, channel: int) -> None:
         """
         Request: turn the given channel ON.
@@ -149,7 +157,7 @@ class PCMDevice:
         logger.info(f"Request to turn ON channel {channel} on PCM {self.name}", extra={"origin": "pcm.PCMDevice.set_channel_on"})
         self.channels[channel].requested_on = True
         if not self.channels[channel].actual_on:
-            logger.info(f"Channel {channel} on PCM {self.name} did not turn ON as expected", extra={"origin": "pcm.PCMDevice.set_channel_on"})
+            logger.warning(f"Channel {channel} on PCM {self.name} did not turn ON as expected", extra={"origin": "pcm.PCMDevice.set_channel_on"})
         else:
             logger.info(f"Turned ON channel {channel} on PCM {self.name}", extra={"origin": "pcm.PCMDevice.set_channel_on"})
         ...
