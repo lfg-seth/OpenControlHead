@@ -6,7 +6,10 @@ import time
 import serial  # pyserial
 from PySide6.QtCore import QObject, Signal, QThread
 import re
+import logging
 
+logger = logging.getLogger("control_head.serial_worker")
+logger.info("SerialWorker module loaded", extra={"origin": "serial_worker.module"})
 
 def _default_port() -> str | None:
     # Linux (Pi): /dev/ttyACM* for Pico CDC (TinyUSB), sometimes ttyUSB*
@@ -50,7 +53,7 @@ class SerialWorker(QObject):
         super().__init__()
         self._port = port or _default_port()
         if not self._port:
-            print("[SerialWorker] No serial device found. Plug in the Pico.")
+            logger.warning("No serial device found. Plug in the Pico.", extra={"origin": "serial_worker.__init__"})
         self._baud = baud
         self._thread = QThread()
         self._reader: _Reader | None = None
@@ -60,8 +63,9 @@ class SerialWorker(QObject):
             return
         try:
             ser = serial.Serial(self._port, self._baud, timeout=0.1)
+            logger.info(f"Opened serial port {self._port} at {self._baud} baud", extra={"origin": "serial_worker.start"})
         except Exception as e:
-            print(f"[SerialWorker] Failed to open {self._port}: {e}")
+            logger.error(f"Failed to open {self._port}: {e}", extra={"origin": "serial_worker.start"})
             return
         self._reader = _Reader(ser)
         self._reader.moveToThread(self._thread)
@@ -70,6 +74,7 @@ class SerialWorker(QObject):
         self._thread.start()
 
     def stop(self):
+        logger.info("Stopping SerialWorker", extra={"origin": "serial_worker.stop"})
         if self._reader:
             self._reader.stop()
         if self._thread.isRunning():
@@ -84,7 +89,7 @@ class SerialWorker(QObject):
             state = parts[0]
             name = parts[1]
             pressed = (state == "PRESS")
-            print(f"[SerialWorker] Button {name} is {state}")
+            logger.info(f"Button {name} is {state}", extra={"origin": "serial_worker._on_line"})
             self.buttonEvent.emit(name, pressed)
             return
-        print(f"[SerialWorker] RX (unhandled): {line}")
+        logger.info(f"RX (unhandled): {line}", extra={"origin": "serial_worker._on_line"})

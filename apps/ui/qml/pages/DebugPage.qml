@@ -46,18 +46,18 @@ Item {
             }
         ]);
     }
-    Rectangle {
-        anchors.fill: parent
-        color: "#0A0A0A"
-        radius: 8
-        border.color: "#141414"
+    Loader {
+        id: pageLoader
+        anchors.top: statusBar.bottom
+        anchors.bottom: bottomGutter.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        source: "Logs.qml"
 
-        Text {
-            font.family: "Oxygen Mono"
-            anchors.centerIn: parent
-            text: "DEBUG"
-            color: "#E6E6E6"
-            font.pixelSize: 36
+        onLoaded: {
+            if (item && item.hasOwnProperty("rootWindow")) {
+                item.rootWindow = root;
+            }
         }
     }
 }

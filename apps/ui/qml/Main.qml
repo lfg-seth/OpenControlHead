@@ -149,6 +149,7 @@ Window {
         // Normalize into exactly 5 entries
         var arr = [];
         for (var i = 0; i < 5; ++i) {
+            LogBridge.log("info", "QML.setTopBar.slot" + i, "Setting top bar button: " + ((buttons && buttons[i] && buttons[i].label) || "unknown"));
             var b = (buttons && buttons[i]) || {};
             arr.push({
                 label: b.label || "",
@@ -176,7 +177,7 @@ Window {
             return;
         if (currentPage === pageId)
             return;
-        console.log("Setting page:", pageId);
+        LogBridge.log("info", "QML.setPage", "Setting page: " + pageId);
         currentPage = pageId;
     }
 
@@ -194,7 +195,7 @@ Window {
         if (item && item.pageId) {
             setPage(item.pageId);
         } else {
-            console.log("No menu item for slot", slotIndex, "on page", currentMenuPage);
+            LogBridge.log("warn", "QML.activateMenuSlot", "No menu item for slot " + slotIndex + " on page " + currentMenuPage);    
         }
     }
 
@@ -202,7 +203,7 @@ Window {
         if (menuPageCount <= 1)
             return;
         currentMenuPage = (currentMenuPage + 1) % menuPageCount;
-        console.log("Menu page ->", currentMenuPage + 1, "/", menuPageCount);
+        LogBridge.log("info", "QML.nextMenuPage", "Switched to menu page " + (currentMenuPage + 1) + " of " + menuPageCount);   
     }
 
     // Hardware → navigation mapping
@@ -212,7 +213,7 @@ Window {
             if (!pressed)
                 return;
 
-            console.log("PicoButton:", name, "pressed");
+            LogBridge.log("info", "QML.Bridge.onPicoButton", "PicoButton: " + name + " pressed");
 
             switch (name) {
             case "COMPUTER":      // your Home key
@@ -288,6 +289,7 @@ Window {
                     enabled: hasAction
                     onClicked: {
                         if (btn.onClick)
+                            LogBridge.log("info", "QML.topGutter.slot" + index, "Clicked " + (btn.label || "unknown") + " button");
                             btn.onClick();
                     }
                 }
@@ -466,7 +468,7 @@ Window {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        console.log("Clicked ", item.label, " button");
+                        LogBridge.log("info", "QML.bottomGutter.slot" + slotIndex, "Clicked " + (item ? item.label : "unknown") + " button");
                         activateMenuSlot(slotIndex);
                     }
                 }
@@ -491,7 +493,7 @@ Window {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    console.log("Clicked MORE button");
+                    LogBridge.log("info", "QML.bottomGutter.slot4", "Clicked MORE button");
                     nextMenuPage();
                 }
             }

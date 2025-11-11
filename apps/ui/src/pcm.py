@@ -16,6 +16,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Protocol, Callable, Dict, List, Optional, Iterable
+import logging
+
+logger = logging.getLogger("control_head.pcm")
 
 
 # ---------- CAN Abstractions ----------
@@ -42,14 +45,14 @@ class CanInterface(Protocol):
         """Transmit a CAN message onto the bus."""
         ...
 
-    def add_rx_callback(self, callback: Callable[[CanMessage], None]) -> None:
-        """
-        Register a function that is called for every received CAN message.
+    # def add_rx_callback(self, callback: Callable[[CanMessage], None]) -> None:
+    #     """
+    #     Register a function that is called for every received CAN message.
 
-        The PCMManager will typically register one callback and then
-        dispatch frames to the appropriate PCMDevice instance.
-        """
-        ...
+    #     The PCMManager will typically register one callback and then
+    #     dispatch frames to the appropriate PCMDevice instance.
+    #     """
+    #     ...
 
 
 # ---------- Channel / ADC / GPIO Models ----------
@@ -122,6 +125,7 @@ class PCMDevice:
         self.node_id = node_id
         self.name = name or f"PCM-{node_id}"
         self._can = can
+        logger.info(f"Creating PCMDevice node_id={node_id}, name={name}", extra={"origin": "pcm.PCMDevice.__init__"})
 
         self.channels: Dict[int, ChannelState] = {
             i: ChannelState(index=i) for i in range(self.NUM_CHANNELS)
@@ -142,12 +146,14 @@ class PCMDevice:
         - Build and send appropriate CAN command
         - Update `requested_on` flag
         """
+        logger.info(f"Request to turn ON channel {channel} on PCM {self.name}", extra={"origin": "pcm.PCMDevice.set_channel_on"})
         ...
 
     def set_channel_off(self, channel: int) -> None:
         """
         Request: turn the given channel OFF.
         """
+        logger.info(f"Request to turn OFF channel {channel} on PCM {self.name}", extra={"origin": "pcm.PCMDevice.set_channel_off"})
         ...
 
     def toggle_channel(self, channel: int) -> None:
@@ -249,17 +255,20 @@ class PCMManager:
     def __init__(self, can: CanInterface):
         self._can = can
         self._pcms: Dict[int, PCMDevice] = {}
+        logger.info("PCMManager created", extra={"origin": "pcm.PCMManager.__init__"})
 
         # Register global RX callback
-        self._can.add_rx_callback(self._on_can_message)
+        # self._can.add_rx_callback(self._on_can_message)
 
     def add_pcm(self, node_id: int, name: Optional[str] = None) -> PCMDevice:
         """
         Create and register a PCMDevice for the given node_id.
         Returns the created instance.
         """
+        logger.info(f"Creating PCMDevice node_id={node_id}, name={name}", extra={"origin": "pcm.PCMManager.add_pcm"})
         device = PCMDevice(node_id=node_id, can=self._can, name=name)
         self._pcms[node_id] = device
+        logger.info(f"PCMDevice created: {device}", extra={"origin": "pcm.PCMManager.add_pcm"})
         return device
 
     def get_pcm(self, node_id: int) -> Optional[PCMDevice]:
@@ -287,10 +296,12 @@ class PCMManager:
     # Convenience helpers for app/Qt:
 
     def set_channel_on(self, node_id: int, channel: int) -> None:
+        logger.info(f"Setting channel {channel} ON for PCM node_id={node_id}", extra={"origin": "pcm.PCMManager.set_channel_on"})
         pcm = self._pcms[node_id]
         pcm.set_channel_on(channel)
 
     def set_channel_off(self, node_id: int, channel: int) -> None:
+        logger.info(f"Setting channel {channel} OFF for PCM node_id={node_id}", extra={"origin": "pcm.PCMManager.set_channel_off"})
         pcm = self._pcms[node_id]
         pcm.set_channel_off(channel)
 
