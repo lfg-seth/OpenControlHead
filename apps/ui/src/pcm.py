@@ -147,6 +147,11 @@ class PCMDevice:
         - Update `requested_on` flag
         """
         logger.info(f"Request to turn ON channel {channel} on PCM {self.name}", extra={"origin": "pcm.PCMDevice.set_channel_on"})
+        self.channels[channel].requested_on = True
+        if not self.channels[channel].actual_on:
+            logger.info(f"Channel {channel} on PCM {self.name} did not turn ON as expected", extra={"origin": "pcm.PCMDevice.set_channel_on"})
+        else:
+            logger.info(f"Turned ON channel {channel} on PCM {self.name}", extra={"origin": "pcm.PCMDevice.set_channel_on"})
         ...
 
     def set_channel_off(self, channel: int) -> None:
@@ -154,6 +159,11 @@ class PCMDevice:
         Request: turn the given channel OFF.
         """
         logger.info(f"Request to turn OFF channel {channel} on PCM {self.name}", extra={"origin": "pcm.PCMDevice.set_channel_off"})
+        self.channels[channel].requested_on = False
+        if self.channels[channel].actual_on:
+            logger.warning(f"Channel {channel} on PCM {self.name} did not turn OFF as expected", extra={"origin": "pcm.PCMDevice.set_channel_off"})
+        else:
+            logger.info(f"Turned OFF channel {channel} on PCM {self.name}", extra={"origin": "pcm.PCMDevice.set_channel_off"})
         ...
 
     def toggle_channel(self, channel: int) -> None:
@@ -161,6 +171,14 @@ class PCMDevice:
         Request: toggle channel state.
         Optional convenience wrapper for UI.
         """
+        logger.info(f"Request to TOGGLE channel {channel} on PCM {self.name}", extra={"origin": "pcm.PCMDevice.toggle_channel"})
+        current_state = self.get_channel_state(channel)
+        logger.info(f"Current state of channel {channel} on PCM {self.name}: requested_on={current_state.requested_on}", extra={"origin": "pcm.PCMDevice.toggle_channel"})
+        if current_state.requested_on:
+            self.set_channel_off(channel)
+        else:
+            self.set_channel_on(channel)
+
         ...
 
     def set_channel_pwm(self, channel: int, duty_cycle: float) -> None:
