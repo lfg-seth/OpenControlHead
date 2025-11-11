@@ -40,7 +40,7 @@ Item {
                 border.color: "#333333"
 
                 Image {
-                    anchors.fill: parent
+                    // anchors.fill: parent
                     source: "qrc:/assets/4runner-02.svg"
                     fillMode: Image.PreserveAspectFit
                     transformOrigin: Item.Center
@@ -49,6 +49,8 @@ Item {
 
             Rectangle {
                 id: controlsPanel
+                anchors.left: svgPanel.right
+                anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 color: "#222222"
