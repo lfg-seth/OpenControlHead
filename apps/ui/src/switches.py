@@ -97,13 +97,22 @@ class LogicalSwitch:
                 )
                 continue
             pcm.set_channel_off(binding.channel_index)
-        ...
+
 
     def toggle(self) -> None:
         """
         Toggle behavior:
         - If all ON -> all OFF.
         - Else (OFF/PARTIAL/UNKNOWN) -> all ON.
+        """
+        ...
+    
+    def cycle(self) -> None:
+        """
+        Cycle behavior (for multi-state switches):
+        - If all OFF -> all ON.
+        - If all ON -> all OFF.
+        - If PARTIAL/UNKNOWN -> all ON.
         """
         ...
 
