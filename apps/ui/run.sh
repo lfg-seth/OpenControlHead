@@ -31,14 +31,14 @@ echo "=== Using Python: $PYTHON_BIN ==="
 
 # --- (Re)create venv if needed or wrong version ---
 NEED_VENV=0
-if [ ! -d "$VENV_DIR" ]; then
-  echo "=== No virtualenv found, creating one ==="
-  NEED_VENV=1
-elif ! "$VENV_DIR/bin/python" -c 'import sys; exit(0 if (3,10) <= sys.version_info[:2] < (3,13) else 1)' 2>/dev/null; then
-  echo "=== Existing venv has incompatible Python, recreating ==="
-  rm -rf "$VENV_DIR"
-  NEED_VENV=1
-fi
+# if [ ! -d "$VENV_DIR" ]; then
+#   echo "=== No virtualenv found, creating one ==="
+#   NEED_VENV=1
+# elif ! "$VENV_DIR/bin/python" -c 'import sys; exit(0 if (3,10) <= sys.version_info[:2] < (3,13) else 1)' 2>/dev/null; then
+#   echo "=== Existing venv has incompatible Python, recreating ==="
+#   rm -rf "$VENV_DIR"
+#   NEED_VENV=1
+# fi
 
 if [ "$NEED_VENV" -eq 1 ]; then
   "$PYTHON_BIN" -m venv "$VENV_DIR"
