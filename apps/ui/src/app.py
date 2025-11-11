@@ -16,9 +16,7 @@ from pcm import PCMManager, CanInterface
 
 
 root_logger = setup_logging()
-
 logger = logging.getLogger("control_head.app")
-
 
 APP_DIR = Path(__file__).resolve().parents[1]
 QML_DIR = APP_DIR / "qml"
@@ -30,7 +28,6 @@ pcm.add_pcm(node_id=2)
 
 switches = SwitchManager(pcm)
 
-# Register logical switches
 front_switch = switches.register_switch(
     name="Front Lights",
     bindings=[
@@ -39,8 +36,6 @@ front_switch = switches.register_switch(
         ChannelBinding(node_id=2, channel_index=0, label="Bumper Lightbar"),
     ],
 )
-front_switch.on()
-front_switch.off()
 
 horn = switches.register_switch(
     name="Horn",
@@ -50,54 +45,67 @@ horn = switches.register_switch(
 )
 
 
-
 class QmlLogBridge(QObject):
-    logAdded = Signal(str, str, str)  # level, origin, message (optional: for UI log view)
+    logAdded = Signal(str, str, str)  # level, origin, message
 
     @Slot(str, str, str)
     def log(self, level, origin, message):
         level = level.upper()
-
-        # Map text level → logging fn
-        logger = logging.getLogger("control_head")
-
+        logger_ = logging.getLogger("control_head")
         extra = {"origin": origin}
-        if level == "DEBUG":
-            logger.debug(message, extra=extra)
-        elif level == "INFO":
-            logger.info(message, extra=extra)
-        elif level == "WARNING":
-            logger.warning(message, extra=extra)
-        elif level == "ERROR":
-            logger.error(message, extra=extra)
-        elif level == "CRITICAL":
-            logger.critical(message, extra=extra)
-        else:
-            logger.info(message, extra=extra)
 
-        # Also emit to QML if you want an on-screen log console
+        if level == "DEBUG":
+            logger_.debug(message, extra=extra)
+        elif level == "INFO":
+            logger_.info(message, extra=extra)
+        elif level == "WARNING":
+            logger_.warning(message, extra=extra)
+        elif level == "ERROR":
+            logger_.error(message, extra=extra)
+        elif level == "CRITICAL":
+            logger_.critical(message, extra=extra)
+        else:
+            logger_.info(message, extra=extra)
+
         self.logAdded.emit(level, origin, message)
 
 
 class Bridge(QObject):
+    """
+    Glue between:
+      - QML (UI)
+      - SerialWorker (physical buttons)
+      - SwitchManager (logical switches -> PCM channels)
+    """
+
+    # Emitted so QML can react to physical button events if desired
     picoButton = Signal(str, bool)
 
     def __init__(self, switches: SwitchManager, parent=None):
         super().__init__(parent)
         self._switches = switches
 
+        # Map physical button IDs from SerialWorker -> logical switch names
+        # TODO: adjust to match actual names coming from your Pico/ESP
+        self._button_map = {
+            "BTN_1": "Front Lights",
+            "BTN_2": "Horn",
+            # "BTN_3": "Some Other Switch",
+        }
+
+    # ---------- QML → Logic ----------
+
     @Slot(str, bool)
     def setSwitchState(self, name: str, on: bool) -> None:
-        """Set a logical switch ON/OFF by name from QML."""
         logger.info(
             f"QML setSwitchState: {name} -> {on}",
-            extra={"origin": "app.Bridge.setSwitchState"}
+            extra={"origin": "app.Bridge.setSwitchState"},
         )
         sw = self._switches.get_switch(name) if hasattr(self._switches, "get_switch") else None
         if sw is None:
             logger.warning(
                 f"Unknown switch '{name}'",
-                extra={"origin": "app.Bridge.setSwitchState"}
+                extra={"origin": "app.Bridge.setSwitchState"},
             )
             return
 
@@ -108,31 +116,58 @@ class Bridge(QObject):
 
     @Slot(str)
     def toggleSwitch(self, name: str) -> None:
-        """Toggle a logical switch by name from QML."""
         logger.info(
             f"QML toggleSwitch: {name}",
-            extra={"origin": "app.Bridge.toggleSwitch"}
+            extra={"origin": "app.Bridge.toggleSwitch"},
         )
         sw = self._switches.get_switch(name) if hasattr(self._switches, "get_switch") else None
         if sw is None:
             logger.warning(
                 f"Unknown switch '{name}'",
-                extra={"origin": "app.Bridge.toggleSwitch"}
+                extra={"origin": "app.Bridge.toggleSwitch"},
             )
             return
 
-        # assuming your logical switch API has .toggle()
         if hasattr(sw, "toggle"):
             sw.toggle()
         else:
-            # fallback if you only have on/off:
             try:
+                # assumes sw.is_on exists
                 sw.off() if sw.is_on else sw.on()
             except AttributeError:
                 logger.error(
                     f"Switch '{name}' has no toggle/is_on; implement as needed",
-                    extra={"origin": "app.Bridge.toggleSwitch"}
+                    extra={"origin": "app.Bridge.toggleSwitch"},
                 )
+
+    # ---------- Serial → Logic (+QML) ----------
+
+    @Slot(str, bool)
+    def handlePicoButton(self, button_name: str, pressed: bool) -> None:
+        """
+        Called when SerialWorker reports a hardware button event.
+        """
+        logger.info(
+            f"Pico button event: {button_name} -> {pressed}",
+            extra={"origin": "app.Bridge.handlePicoButton"},
+        )
+
+        # Re-emit to QML if UI wants to listen
+        self.picoButton.emit(button_name, pressed)
+
+        logical_name = self._button_map.get(button_name)
+        if logical_name is None:
+            logger.warning(
+                f"Unmapped button '{button_name}'",
+                extra={"origin": "app.Bridge.handlePicoButton"},
+            )
+            return
+
+        # Behavior choice:
+        # - On press: toggle logical switch
+        # - On release: ignore   (or implement momentary behavior if you prefer)
+        if pressed:
+            self.toggleSwitch(logical_name)
 
 
 def make_engine(switches: SwitchManager) -> tuple[QQmlApplicationEngine, Bridge, SerialWorker]:
@@ -146,9 +181,13 @@ def make_engine(switches: SwitchManager) -> tuple[QQmlApplicationEngine, Bridge,
         port=None,
         baud=115200,
     )
+
     logger.info("Starting SerialWorker thread", extra={"origin": "app.make_engine"})
     serial.start()
-    serial.buttonEvent.connect(lambda name, pressed: bridge.picoButton.emit(name, pressed))
+
+    # Wire SerialWorker -> Bridge
+    # expects SerialWorker.buttonEvent: Signal(str button_name, bool pressed)
+    serial.buttonEvent.connect(bridge.handlePicoButton)
 
     engine.load(QUrl.fromLocalFile(str(QML_DIR / "Main.qml")))
     if not engine.rootObjects():
@@ -158,11 +197,17 @@ def make_engine(switches: SwitchManager) -> tuple[QQmlApplicationEngine, Bridge,
     root = engine.rootObjects()[0]
     try:
         if platform.system() == "Linux":
-            logger.info("Setting up Linux window flags and fullscreen", extra={"origin": "app.make_engine"})
+            logger.info(
+                "Setting up Linux window flags and fullscreen",
+                extra={"origin": "app.make_engine"},
+            )
             root.setFlags(Qt.FramelessWindowHint | Qt.Window)
             root.showFullScreen()
         else:
-            logger.info("Setting up Windows fixed size window", extra={"origin": "app.make_engine"})
+            logger.info(
+                "Setting up Windows fixed size window",
+                extra={"origin": "app.make_engine"},
+            )
             root.setFlags(Qt.Window)
             root.setMinimumSize(QSize(800, 480))
             root.setMaximumSize(QSize(800, 480))
@@ -178,8 +223,10 @@ def make_engine(switches: SwitchManager) -> tuple[QQmlApplicationEngine, Bridge,
 def main() -> None:
     logger.info("Starting Control Head UI application", extra={"origin": "app.main"})
     app = QGuiApplication(sys.argv)
+
     if platform.system() == "Linux":
         app.setOverrideCursor(Qt.BlankCursor)
+
     engine, bridge, serial = make_engine(switches)
 
     # Log bridge for QML log view
