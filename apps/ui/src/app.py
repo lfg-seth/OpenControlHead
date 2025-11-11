@@ -88,8 +88,8 @@ class Bridge(QObject):
         # Map physical button IDs from SerialWorker -> logical switch names
         # TODO: adjust to match actual names coming from your Pico/ESP
         self._button_map = {
-            "BTN_1": "Front Lights",
-            "BTN_2": "Horn",
+            "LIGHT": "Front Lights",
+            "HORN": "Horn",
             # "BTN_3": "Some Other Switch",
         }
 
