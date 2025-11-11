@@ -40,7 +40,7 @@ Item {
                 border.color: "#333333"
 
                 Image {
-                    anchors.fill: parent
+                    // anchors.fill: parent
                     source: "qrc:/assets/4runner-02.svg"
                     fillMode: Image.PreserveAspectFit
                     transformOrigin: Item.Center
@@ -56,7 +56,7 @@ Item {
                 border.color: "#333333"
 
                 Column {
-                    anchors.centerIn: parent
+                    // anchors.centerIn: parent
                     spacing: 16
 
                     Switch {
