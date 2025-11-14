@@ -87,8 +87,7 @@ class Bridge(QObject):
     Glue between:
       - QML (UI)
       - SwitchManager (logical switches -> PCM channels)
-
-    Physical buttons / SerialWorker can hook in here later, but are optional.
+      - SerialWorker (hardware button events)
     """
 
     # Emitted so QML can react to hardware button events if desired
