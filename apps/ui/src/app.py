@@ -137,7 +137,7 @@ class Bridge(QObject):
     @Slot(str, bool)
     def setSwitchState(self, name: str, on: bool) -> None:
         """
-        Directly set a switch ON/OFF from QML.
+        Directly set a logical switch ON/OFF from QML.
         """
         logger.info(
             f"QML setSwitchState: {name} -> {on}",
@@ -155,7 +155,7 @@ class Bridge(QObject):
     @Slot(str)
     def toggleSwitch(self, name: str) -> None:
         """
-        Toggle a switch from QML.
+        Toggle a logical switch from QML.
         """
         logger.info(
             f"QML toggleSwitch: {name}",
