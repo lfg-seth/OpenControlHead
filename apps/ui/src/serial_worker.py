@@ -81,15 +81,29 @@ class SerialWorker(QObject):
             self._thread.quit()
             self._thread.wait(1000)
 
+
     def _on_line(self, line: str):
-        # Expect lines like: BTN GP9 DOWN  or BTN GP9 UP
-        parts = re.split(r'\s+', line)
-        # Format B: new "PRESS  NUM_4  row=2 col=1"
-        if len(parts) >= 2 and parts[0] in ("PRESS", "RELEASE"):
-            state = parts[0]
-            name = parts[1]
+        line = line.strip()
+
+        # Match:
+        #   1. state: PRESS or RELEASE
+        #   2. name: anything (including spaces) up to the first key=value pair
+        #      or end of line
+        #   3. optional trailing " key=value" fields
+        m = re.match(r'^(PRESS|RELEASE)\s+(.+?)(?:\s+\w+=\S+)*\s*$', line)
+        if m:
+            state = m.group(1)
+            name = m.group(2)
             pressed = (state == "PRESS")
-            logger.info(f"Button {name} is {state}", extra={"origin": "serial_worker._on_line"})
+            logger.info(
+                f"Button {name} is {state}",
+                extra={"origin": "serial_worker._on_line"}
+            )
             self.buttonEvent.emit(name, pressed)
             return
-        logger.info(f"RX (unhandled): {line}", extra={"origin": "serial_worker._on_line"})
+
+        # Fallback / unhandled lines
+        logger.info(
+            f"RX (unhandled): {line}",
+            extra={"origin": "serial_worker._on_line"}
+        )
