@@ -11,7 +11,7 @@ import platform
 import resources_rc  # this line makes the qrc resources available
 import logging
 from logging_setup import setup_logging
-from switches import SwitchManager, ChannelBinding
+from switches import SwitchManager, ChannelBinding, SwitchType
 from pcm import PCMManager, CanInterface
 
 
@@ -22,27 +22,33 @@ APP_DIR = Path(__file__).resolve().parents[1]
 QML_DIR = APP_DIR / "qml"
 
 # --- hardware / logical layer ---
-pcm = PCMManager(CanInterface)
-pcm.add_pcm(node_id=1)
-pcm.add_pcm(node_id=2)
+pcm_mgr = PCMManager(CanInterface)
+front_pcm = pcm_mgr.add_pcm(node_id=1, name="Front PCM")
+rear_pcm  = pcm_mgr.add_pcm(node_id=2, name="Rear PCM")
 
-switches = SwitchManager(pcm)
+# Define channels by what they actually go to
+front_light_left  = front_pcm.init_channel(0, label="Front Light Left")
+front_light_right = front_pcm.init_channel(1, label="Front Light Right")
+grill_light       = front_pcm.init_channel(2, label="Grill Light")
 
-front_switch = switches.register_switch(
+switches = SwitchManager(pcm_mgr)
+
+front_lights = switches.register_switch(
     name="Front Lights",
+    type=SwitchType.CYCLE,
     bindings=[
-        ChannelBinding(node_id=1, channel_index=0, label="Left Grille LED"),
-        ChannelBinding(node_id=1, channel_index=1, label="Right Grille LED"),
-        ChannelBinding(node_id=2, channel_index=0, label="Bumper Lightbar"),
+        front_light_left,
+        front_light_right,
+        grill_light,
+    ],
+    cycles=[
+        [],  # all OFF
+        [front_light_left],
+        [front_light_left, front_light_right],
+        [front_light_left, front_light_right, grill_light],
     ],
 )
 
-horn = switches.register_switch(
-    name="Horn",
-    bindings=[
-        ChannelBinding(node_id=1, channel_index=2, label="Horn"),
-    ],
-)
 
 
 class QmlLogBridge(QObject):
@@ -69,7 +75,6 @@ class QmlLogBridge(QObject):
 
         self.logAdded.emit(level, origin, message)
 
-
 class Bridge(QObject):
     """
     Glue between:
@@ -93,6 +98,17 @@ class Bridge(QObject):
             # "BTN_3": "Some Other Switch",
         }
 
+    # ---------- internals ----------
+
+    def _get_switch(self, name: str):
+        sw = self._switches.get_switch(name) if hasattr(self._switches, "get_switch") else None
+        if sw is None:
+            logger.warning(
+                f"Unknown switch '{name}'",
+                extra={"origin": "app.Bridge._get_switch"},
+            )
+        return sw
+
     # ---------- QML → Logic ----------
 
     @Slot(str, bool)
@@ -101,12 +117,8 @@ class Bridge(QObject):
             f"QML setSwitchState: {name} -> {on}",
             extra={"origin": "app.Bridge.setSwitchState"},
         )
-        sw = self._switches.get_switch(name) if hasattr(self._switches, "get_switch") else None
+        sw = self._get_switch(name)
         if sw is None:
-            logger.warning(
-                f"Unknown switch '{name}'",
-                extra={"origin": "app.Bridge.setSwitchState"},
-            )
             return
 
         if on:
@@ -120,12 +132,8 @@ class Bridge(QObject):
             f"QML toggleSwitch: {name}",
             extra={"origin": "app.Bridge.toggleSwitch"},
         )
-        sw = self._switches.get_switch(name) if hasattr(self._switches, "get_switch") else None
+        sw = self._get_switch(name)
         if sw is None:
-            logger.warning(
-                f"Unknown switch '{name}'",
-                extra={"origin": "app.Bridge.toggleSwitch"},
-            )
             return
 
         if hasattr(sw, "toggle"):
@@ -139,6 +147,43 @@ class Bridge(QObject):
                     f"Switch '{name}' has no toggle/is_on; implement as needed",
                     extra={"origin": "app.Bridge.toggleSwitch"},
                 )
+
+    @Slot(str)
+    def pressSwitch(self, name: str) -> None:
+        """
+        For QML: call when a virtual button is pressed.
+        Delegates to LogicalSwitch.press() if available, else falls back to toggle.
+        """
+        logger.info(
+            f"QML pressSwitch: {name}",
+            extra={"origin": "app.Bridge.pressSwitch"},
+        )
+        sw = self._get_switch(name)
+        if sw is None:
+            return
+
+        if hasattr(sw, "press"):
+            sw.press()
+        else:
+            # Reasonable fallback
+            self.toggleSwitch(name)
+
+    @Slot(str)
+    def releaseSwitch(self, name: str) -> None:
+        """
+        For QML: call when a virtual button is released.
+        Delegates to LogicalSwitch.release() if available, else no-op.
+        """
+        logger.info(
+            f"QML releaseSwitch: {name}",
+            extra={"origin": "app.Bridge.releaseSwitch"},
+        )
+        sw = self._get_switch(name)
+        if sw is None:
+            return
+
+        if hasattr(sw, "release"):
+            sw.release()
 
     # ---------- Serial → Logic (+QML) ----------
 
@@ -163,11 +208,14 @@ class Bridge(QObject):
             )
             return
 
-        # Behavior choice:
-        # - On press: toggle logical switch
-        # - On release: ignore   (or implement momentary behavior if you prefer)
+        sw = self._get_switch(logical_name)
+        if sw is None:
+            return
+
         if pressed:
-            self.toggleSwitch(logical_name)
+            sw.press()
+        else:
+            sw.release()
 
 
 def make_engine(switches: SwitchManager) -> tuple[QQmlApplicationEngine, Bridge, SerialWorker]:

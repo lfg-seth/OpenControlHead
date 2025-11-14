@@ -113,6 +113,9 @@ class PCMDevice:
 
     This class does NOT know about Qt; keep it pure logic so it’s testable.
     """
+    from typing import TYPE_CHECKING
+    if TYPE_CHECKING:
+        from switches import ChannelBinding
 
     NUM_CHANNELS = 26
 
@@ -137,6 +140,28 @@ class PCMDevice:
         self.online: bool = False
 
     # ----- Public control API -----
+    
+    def init_channel(
+        self,
+        channel_index: int,
+        label: Optional[str] = None,
+        pwm_capable: bool = False,
+    ) -> "ChannelBinding":
+        """
+        Helper to define a logical 'channel binding' in plain terms.
+
+        Example:
+            front_left = front_pcm.init_channel(0, label="Front Left Ditch")
+        """
+        from switches import ChannelBinding  # local import to avoid circular
+
+        return ChannelBinding(
+            node_id=self.node_id,
+            channel_index=channel_index,
+            label=label,
+            pwm_capable=pwm_capable,
+        )
+
 
     def get_voltage(self) -> float:
         """
