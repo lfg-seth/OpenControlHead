@@ -2657,6 +2657,299 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Sensor_Temperature:MCP9700Ax-HLT"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U"
+				(at -6.35 6.35 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "MCP9700Ax-HLT"
+				(at 1.27 6.35 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Footprint" "Package_TO_SOT_SMD:SOT-353_SC-70-5"
+				(at 0 -10.16 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "http://ww1.microchip.com/downloads/en/devicedoc/20001942g.pdf"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Low power, analog thermistor temperature sensor, ±2C accuracy, -40C to +150C, in SC-70-5"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "temperature sensor thermistor"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "*SC?70*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "MCP9700Ax-HLT_0_1"
+				(rectangle
+					(start -7.62 5.08)
+					(end 7.62 -5.08)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(polyline
+					(pts
+						(xy -5.08 3.175) (xy -5.08 0)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -5.08 3.175) (xy -4.445 3.175)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -5.08 2.54) (xy -4.445 2.54)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -5.08 1.905) (xy -4.445 1.905)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -5.08 1.27) (xy -4.445 1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -5.08 0.635) (xy -4.445 0.635)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -5.08 3.175)
+					(mid -4.445 3.8073)
+					(end -3.81 3.175)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center -4.445 -2.54)
+					(radius 1.27)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy -3.81 3.175) (xy -3.81 0)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start -3.81 -1.905)
+					(end -5.08 0)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+			)
+			(symbol "MCP9700Ax-HLT_1_1"
+				(pin power_in line
+					(at 0 7.62 270)
+					(length 2.54)
+					(name "V_{DD}"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 -7.62 90)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin no_connect line
+					(at 7.62 2.54 180)
+					(length 2.54)
+					(hide yes)
+					(name "NC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin no_connect line
+					(at 7.62 -2.54 180)
+					(length 2.54)
+					(hide yes)
+					(name "NC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 10.16 0 180)
+					(length 2.54)
+					(name "V_{OUT}"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Sensor_Temperature:MCP9700Ax-HTT"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -3562,79 +3855,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Sensor_Temperature:MCP9700Ax-HTT")
-		(at 205.74 85.09 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "10000c80-fd10-4e57-9c3c-7778b2120ed6")
-		(property "Reference" "U11"
-			(at 196.85 83.8199 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Value" "MCP9700Ax-HTT"
-			(at 196.85 86.3599 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
-			(at 205.74 95.25 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "http://ww1.microchip.com/downloads/en/devicedoc/20001942g.pdf"
-			(at 201.93 78.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Low power, analog thermistor temperature sensor, ±2C accuracy, -40C to +150C, in SOT-23-3"
-			(at 205.74 85.09 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "2"
-			(uuid "b5374347-a74b-4f41-8616-2ca0721f2404")
-		)
-		(pin "1"
-			(uuid "7995ae95-36bc-4fee-8112-2658e10dd56b")
-		)
-		(pin "3"
-			(uuid "cf8e6b2b-d0d6-405f-9489-5f0c364f7e7d")
-		)
-		(instances
-			(project "4ch_pcm"
-				(path "/ea625deb-313a-4762-ae60-2428841f7a9e"
-					(reference "U11")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Power_Management:BTS7004-1EPP")
 		(at 144.78 109.22 0)
 		(unit 1)
@@ -3815,79 +4035,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Sensor_Temperature:MCP9700Ax-HTT")
-		(at 207.01 110.49 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "58d828f4-68d8-4754-a9ed-c2c30176882d")
-		(property "Reference" "U12"
-			(at 198.12 109.2199 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Value" "MCP9700Ax-HTT"
-			(at 198.12 111.7599 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
-			(at 207.01 120.65 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "http://ww1.microchip.com/downloads/en/devicedoc/20001942g.pdf"
-			(at 203.2 104.14 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Low power, analog thermistor temperature sensor, ±2C accuracy, -40C to +150C, in SOT-23-3"
-			(at 207.01 110.49 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "2"
-			(uuid "b8e9a7c8-2bd7-4c59-9d1e-949fada77e2e")
-		)
-		(pin "1"
-			(uuid "cb08db47-fbf6-47b4-a5a9-d3c4c074168e")
-		)
-		(pin "3"
-			(uuid "143c06f5-e678-46b1-af45-6138a42fdb25")
-		)
-		(instances
-			(project "4ch_pcm"
-				(path "/ea625deb-313a-4762-ae60-2428841f7a9e"
-					(reference "U12")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Power_Management:BTS7004-1EPP")
 		(at 147.32 59.69 0)
 		(unit 1)
@@ -3995,17 +4142,17 @@
 		)
 	)
 	(symbol
-		(lib_id "Sensor_Temperature:MCP9700Ax-HTT")
-		(at 208.28 160.02 0)
+		(lib_id "Sensor_Temperature:MCP9700Ax-HLT")
+		(at 194.31 170.18 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "6401b8ae-658b-4739-8f66-3178531182d5")
-		(property "Reference" "U14"
-			(at 199.39 158.7499 0)
+		(uuid "68979415-9e28-40cc-b4a6-8c042c6e5e1e")
+		(property "Reference" "U13"
+			(at 185.42 168.9099 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4013,8 +4160,8 @@
 				(justify right)
 			)
 		)
-		(property "Value" "MCP9700Ax-HTT"
-			(at 199.39 161.2899 0)
+		(property "Value" "MCP9700Ax-HLT"
+			(at 185.42 171.4499 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4022,8 +4169,8 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
-			(at 208.28 170.18 0)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-353_SC-70-5"
+			(at 194.31 180.34 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4032,7 +4179,7 @@
 			)
 		)
 		(property "Datasheet" "http://ww1.microchip.com/downloads/en/devicedoc/20001942g.pdf"
-			(at 204.47 153.67 0)
+			(at 194.31 170.18 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4040,28 +4187,34 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Low power, analog thermistor temperature sensor, ±2C accuracy, -40C to +150C, in SOT-23-3"
-			(at 208.28 160.02 0)
+		(property "Description" "Low power, analog thermistor temperature sensor, ±2C accuracy, -40C to +150C, in SC-70-5"
+			(at 194.31 170.18 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(hide yes)
 			)
-		)
-		(pin "2"
-			(uuid "3679ec60-ef94-4f85-97e4-43bad5ec8a57")
-		)
-		(pin "1"
-			(uuid "2c611471-731d-4184-82f6-5adeb11eb956")
 		)
 		(pin "3"
-			(uuid "7ba34b1b-29a7-41ba-b048-31f5b1b15dab")
+			(uuid "725b582c-1644-4fef-8010-10493dd100f6")
+		)
+		(pin "1"
+			(uuid "0a3ba3f1-6fa6-4fa1-950b-898af788d8c5")
+		)
+		(pin "5"
+			(uuid "f09488ea-3872-4dd4-a313-83d5b8b06e84")
+		)
+		(pin "2"
+			(uuid "296b3213-1394-4f60-b5ca-2e2996cdac42")
+		)
+		(pin "4"
+			(uuid "f2cf9aa2-48a7-42f3-bda5-6480932a393f")
 		)
 		(instances
 			(project "4ch_pcm"
 				(path "/ea625deb-313a-4762-ae60-2428841f7a9e"
-					(reference "U14")
+					(reference "U13")
 					(unit 1)
 				)
 			)
@@ -4368,6 +4521,85 @@
 		)
 	)
 	(symbol
+		(lib_id "Sensor_Temperature:MCP9700Ax-HLT")
+		(at 194.31 92.71 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "7a044828-45f6-4a88-b459-2b66a3ca99e2")
+		(property "Reference" "U12"
+			(at 185.42 91.4399 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "MCP9700Ax-HLT"
+			(at 185.42 93.9799 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-353_SC-70-5"
+			(at 194.31 102.87 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "http://ww1.microchip.com/downloads/en/devicedoc/20001942g.pdf"
+			(at 194.31 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Low power, analog thermistor temperature sensor, ±2C accuracy, -40C to +150C, in SC-70-5"
+			(at 194.31 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "3"
+			(uuid "55f4f2c1-89b6-4984-9026-f3693b932e65")
+		)
+		(pin "1"
+			(uuid "bd7b859e-209b-4a04-9085-9174fe813a55")
+		)
+		(pin "5"
+			(uuid "e8f2b61b-2580-415b-b3a3-d460e7753360")
+		)
+		(pin "2"
+			(uuid "6de08445-015a-4265-b3db-997d8fba5f45")
+		)
+		(pin "4"
+			(uuid "d57a8012-cbad-4c28-955b-148e8d3d7e10")
+		)
+		(instances
+			(project "4ch_pcm"
+				(path "/ea625deb-313a-4762-ae60-2428841f7a9e"
+					(reference "U12")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Switch:SW_DIP_x08")
 		(at 318.77 203.2 0)
 		(unit 1)
@@ -4478,17 +4710,17 @@
 		)
 	)
 	(symbol
-		(lib_id "Sensor_Temperature:MCP9700Ax-HTT")
-		(at 208.28 135.89 0)
+		(lib_id "Sensor_Temperature:MCP9700Ax-HLT")
+		(at 194.31 111.76 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "9171d370-1ed7-4534-9dc2-fc0f59f86659")
-		(property "Reference" "U13"
-			(at 199.39 134.6199 0)
+		(uuid "b3bd90e3-fb5d-4b0f-9b17-153c2dbdec59")
+		(property "Reference" "U6"
+			(at 185.42 110.4899 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4496,8 +4728,8 @@
 				(justify right)
 			)
 		)
-		(property "Value" "MCP9700Ax-HTT"
-			(at 199.39 137.1599 0)
+		(property "Value" "MCP9700Ax-HLT"
+			(at 185.42 113.0299 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4505,8 +4737,8 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
-			(at 208.28 146.05 0)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-353_SC-70-5"
+			(at 194.31 121.92 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4515,7 +4747,7 @@
 			)
 		)
 		(property "Datasheet" "http://ww1.microchip.com/downloads/en/devicedoc/20001942g.pdf"
-			(at 204.47 129.54 0)
+			(at 194.31 111.76 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4523,28 +4755,34 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Low power, analog thermistor temperature sensor, ±2C accuracy, -40C to +150C, in SOT-23-3"
-			(at 208.28 135.89 0)
+		(property "Description" "Low power, analog thermistor temperature sensor, ±2C accuracy, -40C to +150C, in SC-70-5"
+			(at 194.31 111.76 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(hide yes)
 			)
-		)
-		(pin "2"
-			(uuid "f575d10f-3563-494a-9038-dca30ceda05e")
-		)
-		(pin "1"
-			(uuid "2d156f1f-ee76-470b-b8d1-6a7081c06b55")
 		)
 		(pin "3"
-			(uuid "331c6b20-6620-42ec-bc89-8befd0a636ae")
+			(uuid "7c788907-606a-47d8-b16f-8d4de7c8f2b0")
+		)
+		(pin "1"
+			(uuid "66810416-6e12-4cfd-ab61-d1194fb7e73e")
+		)
+		(pin "5"
+			(uuid "38e967e6-5c7e-4737-ae0a-58c88845524f")
+		)
+		(pin "2"
+			(uuid "4d9f96ed-f1f8-48f5-959d-82042c517eb6")
+		)
+		(pin "4"
+			(uuid "c9c8659c-1fe4-4ac9-8c6e-f8d2ec11a93d")
 		)
 		(instances
-			(project "4ch_pcm"
+			(project ""
 				(path "/ea625deb-313a-4762-ae60-2428841f7a9e"
-					(reference "U13")
+					(reference "U6")
 					(unit 1)
 				)
 			)
@@ -4751,6 +4989,85 @@
 		)
 	)
 	(symbol
+		(lib_id "Sensor_Temperature:MCP9700Ax-HLT")
+		(at 194.31 152.4 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d3eaab45-0ddf-4ac6-8001-6e4c336173ae")
+		(property "Reference" "U11"
+			(at 185.42 151.1299 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "MCP9700Ax-HLT"
+			(at 185.42 153.6699 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-353_SC-70-5"
+			(at 194.31 162.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "http://ww1.microchip.com/downloads/en/devicedoc/20001942g.pdf"
+			(at 194.31 152.4 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Low power, analog thermistor temperature sensor, ±2C accuracy, -40C to +150C, in SC-70-5"
+			(at 194.31 152.4 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "3"
+			(uuid "8e6561b0-ba9b-435d-9ead-0faa60607182")
+		)
+		(pin "1"
+			(uuid "8650f377-a664-4981-899c-ab539ec36536")
+		)
+		(pin "5"
+			(uuid "74d84609-ed1c-4662-8dbc-e9726b350f23")
+		)
+		(pin "2"
+			(uuid "04b6a1ed-48f4-4c2d-9be5-7a1e320627d4")
+		)
+		(pin "4"
+			(uuid "264e60a8-d1cb-4433-928d-2cd4e392d943")
+		)
+		(instances
+			(project "4ch_pcm"
+				(path "/ea625deb-313a-4762-ae60-2428841f7a9e"
+					(reference "U11")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Sensor_Temperature:MCP9700Ax-HTT")
 		(at 208.28 186.69 0)
 		(unit 1)
@@ -4818,6 +5135,85 @@
 			(project "4ch_pcm"
 				(path "/ea625deb-313a-4762-ae60-2428841f7a9e"
 					(reference "U15")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Sensor_Temperature:MCP9700Ax-HLT")
+		(at 154.94 142.24 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "df1bf8ab-b859-4cc6-9863-0c1ff497165c")
+		(property "Reference" "U14"
+			(at 146.05 140.9699 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "MCP9700Ax-HLT"
+			(at 146.05 143.5099 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-353_SC-70-5"
+			(at 154.94 152.4 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "http://ww1.microchip.com/downloads/en/devicedoc/20001942g.pdf"
+			(at 154.94 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Low power, analog thermistor temperature sensor, ±2C accuracy, -40C to +150C, in SC-70-5"
+			(at 154.94 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "3"
+			(uuid "4177b9b9-ceaa-4009-b0e7-413d85510bad")
+		)
+		(pin "1"
+			(uuid "1a818e0c-620a-4a4b-ae42-73ea37fe54c3")
+		)
+		(pin "5"
+			(uuid "be4324fc-25ee-42a3-9391-e3c4878d9280")
+		)
+		(pin "2"
+			(uuid "e907f7e7-dc1a-4104-ad38-d3b398a281b1")
+		)
+		(pin "4"
+			(uuid "4fadb621-7f7e-4f8a-a2a1-38fccd39e4f2")
+		)
+		(instances
+			(project "4ch_pcm"
+				(path "/ea625deb-313a-4762-ae60-2428841f7a9e"
+					(reference "U14")
 					(unit 1)
 				)
 			)
@@ -4925,6 +5321,85 @@
 			(project "4ch_pcm"
 				(path "/ea625deb-313a-4762-ae60-2428841f7a9e"
 					(reference "U5")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Sensor_Temperature:MCP9700Ax-HLT")
+		(at 194.31 132.08 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "f2b63c3b-9a13-4454-a743-10989a6790c1")
+		(property "Reference" "U7"
+			(at 185.42 130.8099 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "MCP9700Ax-HLT"
+			(at 185.42 133.3499 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-353_SC-70-5"
+			(at 194.31 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "http://ww1.microchip.com/downloads/en/devicedoc/20001942g.pdf"
+			(at 194.31 132.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Low power, analog thermistor temperature sensor, ±2C accuracy, -40C to +150C, in SC-70-5"
+			(at 194.31 132.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "3"
+			(uuid "e7df3cf4-9b15-48a2-b34d-846787824f6d")
+		)
+		(pin "1"
+			(uuid "a27aaa28-8c15-48cf-adac-245e6c89a6c6")
+		)
+		(pin "5"
+			(uuid "f348369d-9e24-45bb-9227-630356ac0abd")
+		)
+		(pin "2"
+			(uuid "d641b4b5-421c-4689-a787-5d4b5f84633b")
+		)
+		(pin "4"
+			(uuid "19746f15-aa63-4646-8015-d31ddf1d233f")
+		)
+		(instances
+			(project "4ch_pcm"
+				(path "/ea625deb-313a-4762-ae60-2428841f7a9e"
+					(reference "U7")
 					(unit 1)
 				)
 			)
