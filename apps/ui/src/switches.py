@@ -13,21 +13,6 @@ logger = logging.getLogger("control_head.switches")
 
 
 # ---------- Models ----------
-
-# @dataclass(frozen=True)
-# class ChannelBinding:
-#     """
-#     Links a logical switch to a specific PCM channel.
-
-#     Keeping this small & serializable so it can come from config.
-#     """
-#     node_id: int
-#     channel_index: int
-#     # Optional fields for future use (pwm, role, etc.)
-#     label: Optional[str] = None
-#     pwm_capable: bool = False
-
-
 class SwitchState(Enum):
     UNKNOWN = auto()
     OFF = auto()
@@ -40,9 +25,7 @@ class SwitchType(Enum):
     MOMENTARY = auto()
     CYCLE = auto()
 
-
 # ---------- Logical Switch ----------
-
 class LogicalSwitch:
     def __init__(
         self,
