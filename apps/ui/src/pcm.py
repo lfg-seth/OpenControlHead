@@ -113,9 +113,7 @@ class PCMDevice:
 
     This class does NOT know about Qt; keep it pure logic so it’s testable.
     """
-    from typing import TYPE_CHECKING
-    if TYPE_CHECKING:
-        from switches import ChannelBinding
+
 
     NUM_CHANNELS = 26
 
@@ -130,15 +128,20 @@ class PCMDevice:
         self._can = can
         logger.info(f"Creating PCMDevice node_id={node_id}, name={name}", extra={"origin": "pcm.PCMDevice.__init__"})
 
-        self.channels: Dict[int, ChannelState] = {
-            i: ChannelState(index=i) for i in range(self.NUM_CHANNELS)
-        }
+        self.channels: list[PCMChannel] = [
+            PCMChannel(self, i) for i in range(self.NUM_CHANNELS)
+        ]
         self.adc_channels: Dict[int, AdcChannel] = {}
         self.gpio_pins: Dict[int, GpioPinState] = {}
 
         # Any housekeeping state (heartbeat, firmware version, etc.)
         self.online: bool = False
 
+    def channel(self, index: int, name: str | None = None) -> PCMChannel:
+        ch = self.channels[index]
+        if name:
+            ch.name = name
+        return ch
     # ----- Public control API -----
     
     def init_channel(
@@ -146,21 +149,17 @@ class PCMDevice:
         channel_index: int,
         label: Optional[str] = None,
         pwm_capable: bool = False,
-    ) -> "ChannelBinding":
+    ) -> PCMChannel:
         """
-        Helper to define a logical 'channel binding' in plain terms.
-
-        Example:
-            front_left = front_pcm.init_channel(0, label="Front Left Ditch")
+        Initialize and return a PCMChannel instance for the given index.
+        Optionally set a label and/or mark as PWM-capable.
         """
-        from switches import ChannelBinding  # local import to avoid circular
-
-        return ChannelBinding(
-            node_id=self.node_id,
-            channel_index=channel_index,
-            label=label,
-            pwm_capable=pwm_capable,
-        )
+        ch = self.channels[channel_index]
+        if label:
+            ch.name = label
+        # pwm_capable can be stored/used later as needed
+        logger.info(f"Initialized PCMChannel index={channel_index}, label={label}, pwm_capable={pwm_capable}", extra={"origin": "pcm.PCMDevice.init_channel"})
+        return ch
 
 
     def get_voltage(self) -> float:
@@ -179,40 +178,40 @@ class PCMDevice:
         - Build and send appropriate CAN command
         - Update `requested_on` flag
         """
-        logger.info(f"Request to turn ON channel {channel} on PCM {self.name}", extra={"origin": "pcm.PCMDevice.set_channel_on"})
-        self.channels[channel].requested_on = True
-        if not self.channels[channel].actual_on:
-            logger.warning(f"Channel {channel} on PCM {self.name} did not turn ON as expected", extra={"origin": "pcm.PCMDevice.set_channel_on"})
-        else:
-            logger.info(f"Turned ON channel {channel} on PCM {self.name}", extra={"origin": "pcm.PCMDevice.set_channel_on"})
-        ...
+        ch = self.channels[channel]
+        logger.info(
+            f"Request to turn ON channel {channel} on PCM {self.name}",
+            extra={"origin": "pcm.PCMDevice.set_channel_on"},
+        )
+        ch.requested_on = True
 
     def set_channel_off(self, channel: int) -> None:
         """
         Request: turn the given channel OFF.
         """
-        logger.info(f"Request to turn OFF channel {channel} on PCM {self.name}", extra={"origin": "pcm.PCMDevice.set_channel_off"})
-        self.channels[channel].requested_on = False
-        if self.channels[channel].actual_on:
-            logger.warning(f"Channel {channel} on PCM {self.name} did not turn OFF as expected", extra={"origin": "pcm.PCMDevice.set_channel_off"})
-        else:
-            logger.info(f"Turned OFF channel {channel} on PCM {self.name}", extra={"origin": "pcm.PCMDevice.set_channel_off"})
-        ...
+        ch = self.channels[channel]
+        logger.info(
+            f"Request to turn OFF channel {channel} on PCM {self.name}",
+            extra={"origin": "pcm.PCMDevice.set_channel_off"},
+        )
+        ch.requested_on = False
 
     def toggle_channel(self, channel: int) -> None:
         """
         Request: toggle channel state.
         Optional convenience wrapper for UI.
         """
-        logger.info(f"Request to TOGGLE channel {channel} on PCM {self.name}", extra={"origin": "pcm.PCMDevice.toggle_channel"})
-        current_state = self.get_channel_state(channel)
-        logger.info(f"Current state of channel {channel} on PCM {self.name}: requested_on={current_state.requested_on}", extra={"origin": "pcm.PCMDevice.toggle_channel"})
-        if current_state.requested_on:
+        ch = self.channels[channel]
+        logger.info(
+            f"Request to TOGGLE channel {channel} on PCM {self.name}",
+            extra={"origin": "pcm.PCMDevice.toggle_channel"},
+        )
+        # Use requested_on as your "intent" view
+        if ch.requested_on:
             self.set_channel_off(channel)
         else:
             self.set_channel_on(channel)
 
-        ...
 
     def set_channel_pwm(self, channel: int, duty_cycle: float) -> None:
         """
@@ -223,10 +222,12 @@ class PCMDevice:
 
     def get_channel_state(self, channel: int) -> ChannelState:
         """
-        Return the last-known state for channel `channel`.
-        Does NOT necessarily cause a bus read; relies on prior updates.
+        Return a ChannelState snapshot for channel `channel`.
+        Uses the underlying PCMChannel's state.
         """
-        return self.channels[channel]
+        ch = self.channels[channel]
+        return ch.to_state()
+
 
     # ----- ADC / GPIO API (scaffolding) -----
 
@@ -288,6 +289,51 @@ class PCMDevice:
     def __repr__(self) -> str:
         return f"<PCMDevice name={self.name!r} node_id={self.node_id}>"
 
+class PCMChannel:
+    """
+    Represents a single high-side channel on a PCMDevice.
+    Owns its own state and forwards control calls to the parent PCMDevice.
+    """
+
+    def __init__(self, pcm: "PCMDevice", index: int, name: str = ""):
+        self.pcm = pcm
+        self.index = index
+        self.name = name or f"CH{index}"
+
+        # State that used to live in ChannelState
+        self.health: ChannelHealth = ChannelHealth.UNKNOWN
+        self.current_amps: float = 0.0
+        self.requested_on: bool = False  # what we asked the PCM to do
+        self.actual_on: bool = False     # what the PCM reports back
+
+    # ----- control helpers -----
+
+    def on(self) -> None:
+        """Request to turn this channel ON."""
+        self.pcm.set_channel_on(self.index)
+
+    def off(self) -> None:
+        """Request to turn this channel OFF."""
+        self.pcm.set_channel_off(self.index)
+
+    def toggle(self) -> None:
+        """Convenience toggle using the parent PCMDevice."""
+        self.pcm.toggle_channel(self.index)
+
+    # ----- convenience view -----
+
+    def to_state(self) -> ChannelState:
+        """
+        Return a ChannelState snapshot for this channel.
+        Useful if other code still wants the dataclass view.
+        """
+        return ChannelState(
+            index=self.index,
+            health=self.health,
+            current_amps=self.current_amps,
+            requested_on=self.requested_on,
+            actual_on=self.actual_on,
+        )
 
 # ---------- PCM Manager (multiple modules) ----------
 

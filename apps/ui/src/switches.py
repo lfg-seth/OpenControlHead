@@ -7,25 +7,25 @@ from enum import Enum, auto
 from typing import Dict, List, Iterable, Optional
 import logging
 
-from pcm import PCMManager, ChannelState, ChannelHealth  # adjust import as needed
+from pcm import PCMManager, ChannelState, ChannelHealth, PCMChannel  # adjust import as needed
 
 logger = logging.getLogger("control_head.switches")
 
 
 # ---------- Models ----------
 
-@dataclass(frozen=True)
-class ChannelBinding:
-    """
-    Links a logical switch to a specific PCM channel.
+# @dataclass(frozen=True)
+# class ChannelBinding:
+#     """
+#     Links a logical switch to a specific PCM channel.
 
-    Keeping this small & serializable so it can come from config.
-    """
-    node_id: int
-    channel_index: int
-    # Optional fields for future use (pwm, role, etc.)
-    label: Optional[str] = None
-    pwm_capable: bool = False
+#     Keeping this small & serializable so it can come from config.
+#     """
+#     node_id: int
+#     channel_index: int
+#     # Optional fields for future use (pwm, role, etc.)
+#     label: Optional[str] = None
+#     pwm_capable: bool = False
 
 
 class SwitchState(Enum):
@@ -47,23 +47,20 @@ class LogicalSwitch:
     def __init__(
         self,
         name: str,
-        bindings: List[ChannelBinding],
-        pcm_manager: PCMManager,
-        switch_type: SwitchType = SwitchType.TOGGLE,
-        cycles: Optional[List[List[ChannelBinding]]] = None,
+        channels: List[PCMChannel],
+        type: SwitchType = SwitchType.TOGGLE,
+        cycles: List[List[PCMChannel]] | None = None,
     ):
         self.name = name
-        self._bindings = bindings
-        self._pcm = pcm_manager
-        self.switch_type = switch_type
-
+        self.channels = channels
+        self.type = type
         # For CYCLE behavior
-        self._cycles: List[List[ChannelBinding]] = cycles or []
+        self.cycles: List[List[PCMChannel]] = cycles or []
         self._cycle_index: int = 0  # index into self._cycles
 
         logger.info(
-            f"LogicalSwitch created: {self.name} with {len(bindings)} bindings "
-            f"(type={self.switch_type}, cycles={len(self._cycles)})",
+            f"LogicalSwitch created: {self.name} with {len(channels)} channels "
+            f"(type={self.type}, cycles={len(self.cycles)})",
             extra={"origin": "switches.LogicalSwitch.__init__"},
         )
 
@@ -74,32 +71,16 @@ class LogicalSwitch:
         Turn ALL bound channels ON (as a command).
         """
         logger.info(f"Turning ON LogicalSwitch: {self.name}", extra={"origin": "switches.LogicalSwitch.on"})
-        for binding in self._bindings:
-            pcm = self._pcm.get_pcm(binding.node_id)
-            if pcm is None:
-                logger.warning(
-                    f"PCM node {binding.node_id} not found for switch {self.name}",
-                    extra={"origin": "switches.LogicalSwitch.on"},
-                )
-                continue
-            pcm.set_channel_on(binding.channel_index)
-        # Implementation will loop bindings and call PCMManager.set_channel_on(...)
-        ...
+        for ch in self.channels:
+            ch.on()
 
     def off(self) -> None:
         """
         Turn ALL bound channels OFF (as a command).
         """
         logger.info(f"Turning OFF LogicalSwitch: {self.name}", extra={"origin": "switches.LogicalSwitch.off"})
-        for binding in self._bindings:
-            pcm = self._pcm.get_pcm(binding.node_id)
-            if pcm is None:
-                logger.warning(
-                    f"PCM node {binding.node_id} not found for switch {self.name}",
-                    extra={"origin": "switches.LogicalSwitch.off"},
-                )
-                continue
-            pcm.set_channel_off(binding.channel_index)
+        for ch in self.channels:
+            ch.off()
             
     def press(self) -> None:
         """
@@ -108,7 +89,7 @@ class LogicalSwitch:
         logger.info(f"Pressing LogicalSwitch: {self.name}", extra={"origin": "switches.LogicalSwitch.press"})
         # For now, just toggle. Could be extended for momentary, etc.
         
-        match self.switch_type:
+        match self.type:
             case SwitchType.TOGGLE:
                 self.toggle()
             case SwitchType.MOMENTARY:
@@ -120,97 +101,45 @@ class LogicalSwitch:
         Helper function for when a key is released on the physical keypad. Varies by switch config.
         """
         logger.info(f"Releasing LogicalSwitch: {self.name}", extra={"origin": "switches.LogicalSwitch.release"})
-        match self.switch_type:
+        match self.type:
             case SwitchType.MOMENTARY:
                 self.off()
             case _:
                 pass  # No action for TOGGLE or CYCLE on release
 
     def toggle(self) -> None:
-        """
-        Toggle behavior:
-        - If all ON -> all OFF.
-        - Else (OFF/PARTIAL/UNKNOWN) -> all ON.
-        """
-        current_state = self.get_state()
-        logger.info(f"Toggling LogicalSwitch: {self.name} from state {current_state}", extra={"origin": "switches.LogicalSwitch.toggle"})
-        if current_state == SwitchState.ON:
-            self.off()
+        # TODO: you can base this on get_state()
+        if self.type is SwitchType.CYCLE and self.cycles:
+            self.cycle()
         else:
-            self.on()
-        ...
+            # simple toggle: if "mostly off" -> on, else -> off
+            if self.is_on():
+                self.off()
+            else:
+                self.on()
     
     def cycle(self) -> None:
-        """
-        Cycle behavior (for multi-state switches):
-
-        Example with cycles:
-            [
-                [],  # all off
-                [front_left],
-                [front_left, front_right],
-                [front_left, front_right, grill_light],
-            ]
-
-        Behavior:
-        - Each press -> advance to next step.
-        - First, all bound channels are turned OFF.
-        - Then only the channels in the current cycle step are turned ON.
-        """
-        if not self._cycles:
-            # No explicit cycles configured; fallback to toggle
-            logger.debug(
-                f"No cycles defined for {self.name}, falling back to toggle()",
+        """Advance to next step in cycles array."""
+        if not self.cycles:
+            logger.warning(
+                f"LogicalSwitch {self.name} has no cycles defined; cannot cycle",   
                 extra={"origin": "switches.LogicalSwitch.cycle"},
             )
-            # self.toggle()
             return
-        
-        # Advance cycle index
-        self._cycle_index = (self._cycle_index + 1) % len(self._cycles)
-        step_bindings = self._cycles[self._cycle_index]
-        
+
+        self._cycle_index = (self._cycle_index + 1) % len(self.cycles)
+        step = self.cycles[self._cycle_index]
         logger.info(
-            f"Cycling LogicalSwitch: {self.name} to cycle index: {self._cycle_index} of {len(self._cycles)}",
+            f"Cycling LogicalSwitch {self.name} to step {self._cycle_index}",
             extra={"origin": "switches.LogicalSwitch.cycle"},
         )
-
-        # # Turn everything this switch owns OFF
-        # for binding in self._bindings:
-        #     pcm = self._pcm.get_pcm(binding.node_id)
-        #     if pcm is None:
-        #         logger.warning(
-        #             f"PCM node {binding.node_id} not found for switch {self.name}",
-        #             extra={"origin": "switches.LogicalSwitch.cycle"},
-        #         )
-        #         continue
-        #     pcm.set_channel_off(binding.channel_index)
-
-        # Turn ON the bindings in the current cycle step
-        for binding in step_bindings:
-            pcm = self._pcm.get_pcm(binding.node_id)
-            if pcm is None:
-                logger.warning(
-                    f"PCM node {binding.node_id} not found for switch {self.name}",
-                    extra={"origin": "switches.LogicalSwitch.cycle"},
-                )
-                continue
-            pcm.set_channel_on(binding.channel_index)
-        
-        # Turn off any bindings not in the current cycle step
-        for binding in self._bindings:
-            if binding in step_bindings:
-                continue
-            pcm = self._pcm.get_pcm(binding.node_id)
-            if pcm is None:
-                logger.warning(
-                    f"PCM node {binding.node_id} not found for switch {self.name}",
-                    extra={"origin": "switches.LogicalSwitch.cycle"},
-                )
-                continue
-            pcm.set_channel_off(binding.channel_index)
-            
-
+        # selected on
+        for ch in step:
+            ch.on()
+        # non-selected off
+        other_channels = set(self.channels) - set(step)
+        for ch in other_channels:
+            ch.off()
 
     def get_state(self) -> SwitchState:
         """
@@ -238,6 +167,9 @@ class LogicalSwitch:
             return SwitchState.ON
         return SwitchState.PARTIAL
 
+    def is_on(self) -> bool:
+        states = [ch.state() for ch in self.channels]
+        return any(s.actual_on for s in states)
 
     def iter_channel_states(self) -> Iterable[ChannelState]:
         """
@@ -254,71 +186,53 @@ class LogicalSwitch:
 
 
 # ---------- Switch Manager ----------
-
 class SwitchManager:
-    """
-    Owns all LogicalSwitch instances.
+    def __init__(self):
+        self._switches: dict[str, LogicalSwitch] = {}
 
-    - Bridges high-level UI / config to PCMManager.
-    - Provides simple methods: set_switch_on/off/toggle, listing, lookup.
-    """
-
-    def __init__(self, pcm_manager: PCMManager):
-        self._pcm = pcm_manager
-        self._switches: Dict[str, LogicalSwitch] = {}
-        logger.info("SwitchManager created", extra={"origin": "switches.SwitchManager.__init__"})
-
-    # ----- Registration -----
-
-    def register_switch(
-        self,
-        name: str,
-        bindings: List[ChannelBinding],
-        type: SwitchType = SwitchType.TOGGLE,
-        cycles: Optional[List[List[ChannelBinding]]] = None,
-    ) -> LogicalSwitch:
-        """
-        Create & register a LogicalSwitch with the given bindings.
-
-        `type` controls behavior (TOGGLE / MOMENTARY / CYCLE).
-        `cycles` is an optional list-of-lists of ChannelBindings
-        describing each cycle step.
-        """
-        switch = LogicalSwitch(
-            name=name,
-            bindings=bindings,
-            pcm_manager=self._pcm,
-            switch_type=type,
-            cycles=cycles,
-        )
-        self._switches[name] = switch
+    def add(self, switch: LogicalSwitch) -> LogicalSwitch:
+        self._switches[switch.name] = switch
         return switch
 
-    def get_switch(self, name: str) -> Optional[LogicalSwitch]:
+    def get(self, name: str) -> Optional[LogicalSwitch]:
         return self._switches.get(name)
 
-    def all_switches(self) -> List[LogicalSwitch]:
-        return list(self._switches.values())
+    # optional helpers
+    def __iter__(self):
+        return iter(self._switches.values())
 
-    # ----- Convenience API for UI -----
 
-    def set_switch_on(self, name: str) -> None:
-        sw = self._switches.get(name)
-        if sw:
-            sw.on()
+class ButtonLEDMode(Enum):
+    STATIC = auto()
+    FOLLOW_SWITCH_STATE = auto()
+    FOLLOW_CYCLE_STEP = auto()
+    BLINK = auto()
+    # etc.
 
-    def set_switch_off(self, name: str) -> None:
-        sw = self._switches.get(name)
-        if sw:
-            sw.off()
 
-    def toggle_switch(self, name: str) -> None:
-        sw = self._switches.get(name)
-        if sw:
-            sw.toggle()
+class Button:
+    def __init__(self, id: int, label: str = ""):
+        self.id = id
+        self.label = label or f"BTN{id}"
+        self.bound_switch: LogicalSwitch | None = None
+        self.led_mode: ButtonLEDMode = ButtonLEDMode.FOLLOW_SWITCH_STATE
+        # some representation of color, flashing pattern, etc.
+        self.color = (0, 0, 0)
 
-    def get_switch_state(self, name: str) -> Optional[SwitchState]:
-        sw = self._switches.get(name)
-        if not sw:
-            return None
-        return sw.get_state()
+    def on_press(self):
+        """Called when the *hardware* tells us this button was pressed."""
+        if self.bound_switch:
+            self.bound_switch.toggle()
+
+    def update_led_for_switch_state(self):
+        """Update color/flashing based on bound switch state."""
+        if not self.bound_switch:
+            self.color = (0, 0, 0)
+            return
+
+        state = self.bound_switch.is_on()
+        # Example simple rule:
+        # - off -> dim white
+        # - on -> bright green
+        # - fault/partial -> red/amber (if you expose those)
+        # Here you'd call into the actual hardware driver.

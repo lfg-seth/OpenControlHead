@@ -11,7 +11,7 @@ import platform
 import resources_rc  # this line makes the qrc resources available
 import logging
 from logging_setup import setup_logging
-from switches import SwitchManager, ChannelBinding, SwitchType
+from switches import SwitchManager, SwitchType, LogicalSwitch
 from pcm import PCMManager, CanInterface
 
 
@@ -30,24 +30,31 @@ rear_pcm  = pcm_mgr.add_pcm(node_id=2, name="Rear PCM")
 front_light_left  = front_pcm.init_channel(0, label="Front Light Left")
 front_light_right = front_pcm.init_channel(1, label="Front Light Right")
 grill_light       = front_pcm.init_channel(2, label="Grill Light")
+horn_ch = front_pcm.init_channel(3, label="Horn")
+switches = SwitchManager()
 
-switches = SwitchManager(pcm_mgr)
-
-front_lights = switches.register_switch(
-    name="Front Lights",
-    type=SwitchType.CYCLE,
-    bindings=[
-        front_light_left,
-        front_light_right,
-        grill_light,
-    ],
-    cycles=[
-        [],  # all OFF
-        [front_light_left],
-        [front_light_left, front_light_right],
-        [front_light_left, front_light_right, grill_light],
-    ],
+Front_lights = switches.add(
+    LogicalSwitch(
+        name="Front Lights",
+        type=SwitchType.CYCLE,
+        channels=[front_light_left, front_light_right, grill_light],
+        cycles=[
+            [],
+            [front_light_left],
+            [front_light_left, front_light_right],
+            [front_light_left, front_light_right, grill_light],
+        ],
+    )
 )
+
+Horn = switches.add(
+    LogicalSwitch(
+        name="Horn",
+        type=SwitchType.MOMENTARY,
+        channels=[horn_ch],
+    )
+)
+
 
 
 
@@ -79,29 +86,45 @@ class Bridge(QObject):
     """
     Glue between:
       - QML (UI)
-      - SerialWorker (physical buttons)
       - SwitchManager (logical switches -> PCM channels)
+
+    Physical buttons / SerialWorker can hook in here later, but are optional.
     """
 
-    # Emitted so QML can react to physical button events if desired
+    # Emitted so QML can react to hardware button events if desired
     picoButton = Signal(str, bool)
 
     def __init__(self, switches: SwitchManager, parent=None):
         super().__init__(parent)
         self._switches = switches
 
-        # Map physical button IDs from SerialWorker -> logical switch names
-        # TODO: adjust to match actual names coming from your Pico/ESP
-        self._button_map = {
+        # Optional mapping for future physical buttons -> logical switches
+        self._button_map: dict[str, str] = {
             "LIGHT": "Front Lights",
             "HORN": "Horn",
-            # "BTN_3": "Some Other Switch",
         }
 
     # ---------- internals ----------
 
     def _get_switch(self, name: str):
-        sw = self._switches.get_switch(name) if hasattr(self._switches, "get_switch") else None
+        """
+        Helper to fetch a LogicalSwitch by name from SwitchManager.
+        Works whether SwitchManager is a dict-like or has a .get() method.
+        """
+        sw = None
+
+        # SwitchManager with .get(name)
+        if hasattr(self._switches, "get"):
+            try:
+                sw = self._switches.get(name)
+            except TypeError:
+                # In case .get has a different signature
+                sw = None
+
+        # Or SwitchManager *is* a dict-like
+        if sw is None and isinstance(self._switches, dict):
+            sw = self._switches.get(name)
+
         if sw is None:
             logger.warning(
                 f"Unknown switch '{name}'",
@@ -113,6 +136,9 @@ class Bridge(QObject):
 
     @Slot(str, bool)
     def setSwitchState(self, name: str, on: bool) -> None:
+        """
+        Directly set a switch ON/OFF from QML.
+        """
         logger.info(
             f"QML setSwitchState: {name} -> {on}",
             extra={"origin": "app.Bridge.setSwitchState"},
@@ -128,6 +154,9 @@ class Bridge(QObject):
 
     @Slot(str)
     def toggleSwitch(self, name: str) -> None:
+        """
+        Toggle a switch from QML.
+        """
         logger.info(
             f"QML toggleSwitch: {name}",
             extra={"origin": "app.Bridge.toggleSwitch"},
@@ -136,23 +165,20 @@ class Bridge(QObject):
         if sw is None:
             return
 
-        if hasattr(sw, "toggle"):
+        try:
             sw.toggle()
-        else:
-            try:
-                # assumes sw.is_on exists
-                sw.off() if sw.is_on else sw.on()
-            except AttributeError:
-                logger.error(
-                    f"Switch '{name}' has no toggle/is_on; implement as needed",
-                    extra={"origin": "app.Bridge.toggleSwitch"},
-                )
+        except AttributeError:
+            logger.error(
+                f"Switch '{name}' has no toggle(); add it to LogicalSwitch",
+                extra={"origin": "app.Bridge.toggleSwitch"},
+            )
 
     @Slot(str)
     def pressSwitch(self, name: str) -> None:
         """
-        For QML: call when a virtual button is pressed.
-        Delegates to LogicalSwitch.press() if available, else falls back to toggle.
+        For QML: call when a virtual button is pressed (mouse/touch down).
+        Typically mapped to LogicalSwitch.press(), which can implement
+        TOGGLE / MOMENTARY / CYCLE behavior.
         """
         logger.info(
             f"QML pressSwitch: {name}",
@@ -165,14 +191,14 @@ class Bridge(QObject):
         if hasattr(sw, "press"):
             sw.press()
         else:
-            # Reasonable fallback
+            # Reasonable fallback: just toggle
             self.toggleSwitch(name)
 
     @Slot(str)
     def releaseSwitch(self, name: str) -> None:
         """
-        For QML: call when a virtual button is released.
-        Delegates to LogicalSwitch.release() if available, else no-op.
+        For QML: call when a virtual button is released (mouse/touch up).
+        Typically mapped to LogicalSwitch.release() for momentary behavior.
         """
         logger.info(
             f"QML releaseSwitch: {name}",
@@ -185,19 +211,21 @@ class Bridge(QObject):
         if hasattr(sw, "release"):
             sw.release()
 
-    # ---------- Serial → Logic (+QML) ----------
+    # ---------- Serial / physical buttons → Logic (+QML) ----------
 
     @Slot(str, bool)
     def handlePicoButton(self, button_name: str, pressed: bool) -> None:
         """
-        Called when SerialWorker reports a hardware button event.
+        Optional: called when SerialWorker reports a hardware button event.
+
+        You can leave this unused for now; it doesn't affect QML behavior.
         """
         logger.info(
             f"Pico button event: {button_name} -> {pressed}",
             extra={"origin": "app.Bridge.handlePicoButton"},
         )
 
-        # Re-emit to QML if UI wants to listen
+        # Re-emit to QML if UI wants to listen (optional)
         self.picoButton.emit(button_name, pressed)
 
         logical_name = self._button_map.get(button_name)
@@ -213,9 +241,13 @@ class Bridge(QObject):
             return
 
         if pressed:
-            sw.press()
+            if hasattr(sw, "press"):
+                sw.press()
+            else:
+                sw.toggle()
         else:
-            sw.release()
+            if hasattr(sw, "release"):
+                sw.release()
 
 
 def make_engine(switches: SwitchManager) -> tuple[QQmlApplicationEngine, Bridge, SerialWorker]:
