@@ -40,9 +40,10 @@ Item {
                 border.color: "#333333"
 
                 Image {
-                    anchors.fill: parent
+                    anchors.centerIn: parent
                     source: "qrc:/assets/4runner-02.svg"
                     fillMode: Image.PreserveAspectFit
+                    height: parent.height * .8
                     transformOrigin: Item.Center
                 }
             }
@@ -63,6 +64,8 @@ Item {
 
                     Switch {
                         id: frontLightsSwitch
+                        property bool isSwitch: true
+                        property string switchName: "Front Lights"
                         text: "Front Lights"
                         onToggled: {
                             // `checked` is the new state

@@ -150,6 +150,7 @@ class Bridge(QObject):
             sw.on()
         else:
             sw.off()
+    
 
     @Slot(str)
     def toggleSwitch(self, name: str) -> None:
