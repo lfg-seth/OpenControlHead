@@ -10,11 +10,26 @@ Item {
             return;
 
         rootWindow.setTopBar([
-            { label: "INTERIOR", onClick: function () {} },
-            { label: "SCENES",   onClick: function () {} },
-            { label: "<----",    onClick: function () {} },
-            { label: "<---->",   onClick: function () {} },
-            { label: "---->",    onClick: function () {} }
+            {
+                label: "INTERIOR",
+                onClick: function () {}
+            },
+            {
+                label: "SCENES",
+                onClick: function () {}
+            },
+            {
+                label: "<----",
+                onClick: function () {}
+            },
+            {
+                label: "<---->",
+                onClick: function () {}
+            },
+            {
+                label: "---->",
+                onClick: function () {}
+            }
         ]);
     }
 
@@ -28,8 +43,8 @@ Item {
         Row {
             id: contentRow
             anchors.fill: parent
-            anchors.margins: 20
-            spacing: 20
+            anchors.margins: 10
+            spacing: 10
 
             Rectangle {
                 id: svgPanel
@@ -59,24 +74,43 @@ Item {
                 border.color: "#333333"
 
                 Column {
-                    anchors.centerIn: parent
+                    anchors.left: parent.left
                     spacing: 16
 
-                    Switch {
-                        id: frontLightsSwitch
-                        property bool isSwitch: true
-                        property string switchName: "Front Lights"
-                        text: "Front Lights"
-                        onToggled: {
-                            // `checked` is the new state
-                            Bridge.setSwitchState("Front Lights", checked)
-                        }
+                    Text {
+                        text: "P1 FRONT LIGHTS"
+                        font.pixelSize: 18
+                        color: "#FFFFFF"
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        padding: 10
                     }
 
-                    // Example of a pure action button:
-                    Button {
-                        text: "Toggle Front Lights"
-                        onClicked: Bridge.toggleSwitch("Front Lights")
+                    Text {
+                        text: "P2 DITCH LIGHTS"
+                        font.pixelSize: 18
+                        color: "#FFFFFF"
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
+
+                    Text {
+                        text: "P3 REAR LIGHTS"
+                        font.pixelSize: 18
+                        color: "#FFFFFF"
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
+
+                    Text {
+                        text: "P4 ROCK LIGHTS"
+                        font.pixelSize: 18
+                        color: "#FFFFFF"
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
+
+                    Text {
+                        text: "P5 Emergency Lights"
+                        font.pixelSize: 18
+                        color: "#FFFFFF"
+                        anchors.horizontalCenter: parent.horizontalCenter
                     }
                 }
             }
