@@ -4,7 +4,7 @@
 
 ## Feature List
 
-* Turn lights on and off
+* Turn lights on and off [In progresss]
   * Front Lights
   * Ditch Lights
   * Rock Lights
