@@ -81,94 +81,84 @@ Item {
                     anchors.margins: 20
                     width: parent.width - 100
 
-                    Row {
-                        width: parent.width
-                        spacing: 40
-
-                        Text {
-                            text: "P1 FRONT LIGHTS"
-                            font.pixelSize: 30
-                            color: "#FFFFFF"
-                            padding: 3
-                        }
-                        Text {
-                            text: "HIGH"
-                            font.pixelSize: 30
-                            color: '#00FFFF'
-                            padding: 3
-                        }
+                    Text {
+                        font.family: "Oxygen Mono"
+                        text: "P1 FRONT LIGHTS"
+                        font.pixelSize: 30
+                        color: "#FFFFFF"
+                        padding: 3
                     }
 
-                    Row {
-                        width: parent.width
-                        spacing: 30
-
-                        Text {
-                            text: "P2 DITCH LIGHTS"
-                            font.pixelSize: 30
-                            color: "#FFFFFF"
-                            padding: 3
-                        }
-                        Text {
-                            text: "HIGH"
-                            font.pixelSize: 30
-                            color: '#00FFFF'
-                            padding: 3
-                        }
+                    Text {
+                        font.family: "Oxygen Mono"
+                        text: "P2 DITCH LIGHTS"
+                        font.pixelSize: 30
+                        color: "#FFFFFF"
+                        padding: 3
+                    }
+                    Text {
+                        font.family: "Oxygen Mono"
+                        text: "P3 REAR LIGHTS"
+                        font.pixelSize: 30
+                        color: "#FFFFFF"
+                        padding: 3
+                    }
+                    Text {
+                        font.family: "Oxygen Mono"
+                        text: "P4 ROCK LIGHTS"
+                        font.pixelSize: 30
+                        color: "#FFFFFF"
+                        padding: 3
                     }
 
-                    Row {
-                        width: parent.width
-                        spacing: 30
-
-                        Text {
-                            text: "P3 REAR LIGHTS"
-                            font.pixelSize: 30
-                            color: "#FFFFFF"
-                            padding: 3
-                        }
-                        Text {
-                            text: "HIGH"
-                            font.pixelSize: 30
-                            color: '#00FFFF'
-                            padding: 3
-                        }
+                    Text {
+                        font.family: "Oxygen Mono"
+                        text: "P5 EMERGENCY LIGHTS"
+                        font.pixelSize: 30
+                        color: "#FFFFFF"
+                        padding: 3
                     }
-
-                    Row {
-                        width: parent.width
-                        spacing: 30
-
-                        Text {
-                            text: "P4 ROCK LIGHTS"
-                            font.pixelSize: 30
-                            color: "#FFFFFF"
-                            padding: 3
-                        }
-                        Text {
-                            text: "HIGH"
-                            font.pixelSize: 30
-                            color: '#00FFFF'
-                            padding: 3
-                        }
+                }
+                Column {
+                    id: valueColumn
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    spacing: 10
+                    anchors.margins: 20
+                    Text {
+                        font.family: "Oxygen Mono"
+                        text: "HIGH"
+                        font.pixelSize: 30
+                        color: '#00FFFF'
+                        padding: 3
                     }
-
-                    Row {
-                        width: parent.width
-                        spacing: 30
-
-                        Text {
-                            text: "P5 EMERGENCY LIGHTS"
-                            font.pixelSize: 30
-                            color: "#FFFFFF"
-                            padding: 3
-                        }
-                        Text {
-                            text: "HIGH"
-                            font.pixelSize: 30
-                            color: '#00FFFF'
-                            padding: 3
-                        }
+                    Text {
+                        font.family: "Oxygen Mono"
+                        text: "HIGH"
+                        font.pixelSize: 30
+                        color: '#00FFFF'
+                        padding: 3
+                    }
+                    Text {
+                        font.family: "Oxygen Mono"
+                        text: "HIGH"
+                        font.pixelSize: 30
+                        color: '#00FFFF'
+                        padding: 3
+                    }
+                    Text {
+                        font.family: "Oxygen Mono"
+                        text: "HIGH"
+                        font.pixelSize: 30
+                        color: '#00FFFF'
+                        padding: 3
+                    }
+                    Text {
+                        font.family: "Oxygen Mono"
+                        text: "HIGH"
+                        font.pixelSize: 30
+                        color: '#00FFFF'
+                        padding: 3
                     }
                 }
             }
