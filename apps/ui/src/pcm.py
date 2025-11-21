@@ -501,7 +501,7 @@ class PCMManager:
         logger.info("PCMManager created", extra={"origin": "pcm.PCMManager.__init__"})
 
         # Register global RX callback so we see all frames.
-        self._can.add_rx_callback(self._on_can_message)
+        self._can.add_rx_callback(callback=self._on_can_message)
 
     def add_pcm(self, node_id: int, name: Optional[str] = None) -> PCMDevice:
         """

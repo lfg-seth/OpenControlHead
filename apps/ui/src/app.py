@@ -12,7 +12,7 @@ import resources_rc  # this line makes the qrc resources available
 import logging
 from logging_setup import setup_logging
 from switches import SwitchManager, SwitchType, LogicalSwitch
-from pcm import PCMManager, CanInterface
+from pcm import PCMManager, CanInterface, SocketCanInterface
 
 
 root_logger = setup_logging()
@@ -22,7 +22,8 @@ APP_DIR = Path(__file__).resolve().parents[1]
 QML_DIR = APP_DIR / "qml"
 
 # --- hardware / logical layer ---
-pcm_mgr = PCMManager(CanInterface)
+can_iface = SocketCanInterface(channel="can0")
+pcm_mgr = PCMManager(can_iface)
 front_pcm = pcm_mgr.add_pcm(node_id=1, name="Front PCM")
 rear_pcm  = pcm_mgr.add_pcm(node_id=2, name="Rear PCM")
 
