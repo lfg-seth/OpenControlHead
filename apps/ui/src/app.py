@@ -32,6 +32,7 @@ front_light_left  = front_pcm.init_channel(0, label="Front Light Left")
 front_light_right = front_pcm.init_channel(1, label="Front Light Right")
 grill_light       = front_pcm.init_channel(2, label="Grill Light")
 horn_ch = front_pcm.init_channel(3, label="Horn")
+front_flashers = front_pcm.init_macro(0, label="Front Flashers")
 switches = SwitchManager()
 
 Front_lights = switches.add(

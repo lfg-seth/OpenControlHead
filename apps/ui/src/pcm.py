@@ -50,6 +50,7 @@ SUBJECT_PCM_SINGLE_CMD   = 0x00
 SUBJECT_PCM_BULK_CMD     = 0x01
 SUBJECT_PCM_PWM_CONFIG   = 0x02
 SUBJECT_PCM_REQ_SNAPSHOT = 0x03
+SUBJECT_PCM_MACRO_CMD    = 0x04
 
 # Subjects within PCM Status (CLASS = 0x02)
 SUBJECT_PCM_SINGLE_STATUS = 0x00
@@ -318,6 +319,9 @@ class PCMDevice:
         self.channels: list[PCMChannel] = [
             PCMChannel(self, i) for i in range(self.NUM_CHANNELS)
         ]
+        self.macros: list[PCMMacro] = [
+            PCMMacro(self, i) for i in range(32)  # Assuming 32 macros for example
+        ]
         self.adc_channels: Dict[int, AdcChannel] = {}
         self.gpio_pins: Dict[int, GpioPinState] = {}
 
@@ -329,6 +333,8 @@ class PCMDevice:
         if name:
             ch.name = name
         return ch
+    
+
 
     # ----- CAN encoding helpers for this device -----
 
@@ -377,6 +383,24 @@ class PCMDevice:
             extra={"origin": "pcm.PCMDevice.init_channel"},
         )
         return ch
+    
+    def init_macro(
+            self,
+            macro_index: int,
+            label: Optional[str] = None,
+        ) -> "PCMMacro":
+        """
+        Initialize and return a PCMMacro instance for the given index.
+        Optionally set a label.
+        """
+        macro = self.macros[macro_index]
+        if label:
+            macro.name = label
+        logger.info(
+            f"Initialized PCMMacro index={macro_index}, label={label}",
+            extra={"origin": "pcm.PCMDevice.init_macro"},
+        )
+        return macro
 
     def get_voltage(self) -> float:
         """
@@ -388,6 +412,31 @@ class PCMDevice:
         )
         # Placeholder implementation until board metrics are wired up.
         return 12.0
+
+    def set_macro_on(self, macro_index: int) -> None:
+        """
+        Request: turn the given macro ON via Macro Control Command.
+        Payload (DLC=2):
+          Byte 0: macro index
+          Byte 1: command (0x01 = ON)
+        """
+        logger.info(
+            f"Request to turn ON macro {macro_index} on PCM {self.name}",
+            extra={"origin": "pcm.PCMDevice.set_macro_on"},
+        )
+        payload = bytes([macro_index & 0xFF, 0x01])
+        self._send_pcm_control(SUBJECT_PCM_MACRO_CMD, payload)
+
+    def set_macro_off(self, macro_index: int) -> None:
+        """
+        Request: turn the given macro OFF via Macro Control Command.
+        """
+        logger.info(
+            f"Request to turn OFF macro {macro_index} on PCM {self.name}",
+            extra={"origin": "pcm.PCMDevice.set_macro_off"},
+        )
+        payload = bytes([macro_index & 0xFF, 0x00])
+        self._send_pcm_control(SUBJECT_PCM_MACRO_CMD, payload)
 
     def set_channel_on(self, channel: int) -> None:
         """
@@ -603,6 +652,23 @@ class PCMDevice:
     def __repr__(self) -> str:
         return f"<PCMDevice name={self.name!r} node_id=0x{self.node_id:02X}>"
 
+
+class PCMMacro:
+    """
+    A macro is like a virtual channel on the PCM that controls flashing patterns on the PCM. 
+    """
+
+    def __init__(self, pcm: "PCMDevice", index: int, name: str = ""):
+        self.pcm = pcm
+        self.index = index
+        self.name = name or f"MACRO{index}"
+
+        self.requested_on: bool = False  # what we asked the PCM to do
+        self.actual_on: bool = False     # what the PCM reports back
+
+        def on(self) -> None:
+            """Request to turn this macro ON."""
+            self.pcm.set_macro_on(self.index)
 
 class PCMChannel:
     """
