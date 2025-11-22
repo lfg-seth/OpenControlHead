@@ -7,7 +7,7 @@ from enum import Enum, auto
 from typing import Dict, List, Iterable, Optional
 import logging
 
-from pcm import PCMManager, ChannelState, ChannelHealth, PCMChannel  # adjust import as needed
+from pcm import PCMManager, ChannelState, ChannelHealth, PCMChannel, PCMMacro  # adjust import as needed
 
 logger = logging.getLogger("control_head.switches")
 
@@ -30,7 +30,7 @@ class LogicalSwitch:
     def __init__(
         self,
         name: str,
-        channels: List[PCMChannel],
+        channels: List[PCMChannel] | List[PCMMacro],
         type: SwitchType = SwitchType.TOGGLE,
         cycles: List[List[PCMChannel]] | None = None,
     ):

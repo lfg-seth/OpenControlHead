@@ -57,6 +57,14 @@ Horn = switches.add(
     )
 )
 
+Flashers = switches.add(
+    LogicalSwitch(
+        name="Flashers",
+        type=SwitchType.TOGGLE,
+        channels=[front_flashers],
+    )
+)
+
 
 
 
@@ -102,7 +110,7 @@ class Bridge(QObject):
         # Optional mapping for future physical buttons -> logical switches
         self._button_map: dict[str, str] = {
             "LIGHT": "Front Lights",
-            "HORN": "Horn",
+            "HORN": "Flashers",
         }
 
     # ---------- internals ----------
