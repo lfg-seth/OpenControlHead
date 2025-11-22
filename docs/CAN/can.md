@@ -120,6 +120,7 @@ For `MSG_CLASS = 0x01 (PCM Control)`:
 - `0x01` — Bulk channel command (bitfield)
 - `0x02` — PWM config
 - `0x03` — Request status snapshot
+- `0x04` — Macro Control
 - `0x1F` — Reserved
 
 For `MSG_CLASS = 0x02 (PCM Status)`:
@@ -201,7 +202,23 @@ Byte 0: 0x01 = request channel snapshot
 
 PCM responds with appropriate `MSG_CLASS = 0x02/0x03` messages.
 
+
+### 4.4 Macro Control
+
+Turn on and off programmed Macros for flashing patterns
+
+**SUBJECT:** `0x04`
+**DLC:** 2
+```
+Byte 0: Macro Index
+Byte 1: Command
+        0x00 OFF
+        0x01 ON
+```
+
 ---
+
+
 
 ## 5. PCM Status Messages (MSG_CLASS = 0x02)
 
