@@ -16,6 +16,7 @@ void enter_bootsel()
 #define BOTTOM_NUM_LEDS 45
 #define BOTTOM_DATAPIN 14  // GP14
 #define BOTTOM_CLOCKPIN 15 // GP15
+#define LED_BRIGHTNESS 64  // 0-255
 
 Adafruit_DotStar strip_top(TOP_NUM_LEDS, TOP_DATAPIN, TOP_CLOCKPIN, DOTSTAR_BRG);
 Adafruit_DotStar strip_bottom(BOTTOM_NUM_LEDS, BOTTOM_DATAPIN, BOTTOM_CLOCKPIN, DOTSTAR_BRG);
@@ -59,27 +60,27 @@ inline void setLED(const LedBinding &lb, uint8_t r, uint8_t g, uint8_t b)
 {
   if (lb.pixel < 0)
     return;
-  getStrip(lb.stripId).setPixelColor(lb.pixel, r, g, b);
+  getStrip(lb.stripId).setPixelColor(lb.pixel, g, r, b);
 }
 inline void showLEDs()
 {
   strip_top.show();
   strip_bottom.show();
 }
-inline void setIdle(const LedBinding &lb) { setLED(lb, 255, 160, 0); }   // amber
-inline void setActive(const LedBinding &lb) { setLED(lb, 0, 255, 255); } // cyan
+inline void setIdle(const LedBinding &lb) { setLED(lb, 143, 255, 255); } // amber
+inline void setActive(const LedBinding &lb) { setLED(lb, 255, 0, 0); }   // cyan
 
 // ---- TOP (5x2) — order matches idxRC(r,c) so debounce can index by i directly
 static const ButtonDef TOP_MAP[10] = {
     /* r0c0 */ {"HORN", {0, 3}, 0, 0},
     /* r0c1 */ {"SIREN", {0, 2}, 0, 1},
-    /* r1c0 */ {"LIGHT FRONT", {0, 11}, 1, 0},
-    /* r1c1 */ {"LIGHT RIGHT", {0, 14}, 1, 1},
-    /* r2c0 */ {"LIGHT LEFT", {0, 15}, 2, 0},
-    /* r2c1 */ {"SIREN SHARP", {0, 0}, 2, 1},
+    /* r1c0 */ {"LIGHT_FRONT", {0, 11}, 1, 0},
+    /* r1c1 */ {"LIGHT_RIGHT", {0, 14}, 1, 1},
+    /* r2c0 */ {"LIGHT_LEFT", {0, 15}, 2, 0},
+    /* r2c1 */ {"SIREN_SHARP", {0, 0}, 2, 1},
     /* r3c0 */ {"MANUAL", {0, 4}, 3, 0},
-    /* r3c1 */ {"SIREN TOOTH", {0, 1}, 3, 1},
-    /* r4c0 */ {"ORANGE BUTTON", {0, 12}, 4, 0},
+    /* r3c1 */ {"SIREN_TOOTH", {0, 1}, 3, 1},
+    /* r4c0 */ {"ORANGE_BUTTON", {0, 12}, 4, 0},
     /* r4c1 */ {"PA", {0, 13}, 4, 1},
 };
 
@@ -112,17 +113,17 @@ static const ButtonDef BOTTOM_MAP[38] = {
     /* r3c9 */ {"P5", {1, 24}, 3, 9},
 
     /* r4c6 */ {"T_ROW4", {1, 1}, 4, 6},
-    /* r4c7 */ {"DAY/NIGHT", {1, 11}, 4, 7},
+    /* r4c7 */ {"DAY_NIGHT", {1, 11}, 4, 7},
     /* r4c8 */ {"B_ROW4", {1, 21}, 4, 8},
     /* r4c9 */ {"P4", {1, 22}, 4, 9},
 
     /* r5c6 */ {"T_ROW3", {1, 2}, 5, 6},
-    /* r5c7 */ {"BRIGHT -", {1, 10}, 5, 7},
+    /* r5c7 */ {"BRIGHT-", {1, 10}, 5, 7},
     /* r5c8 */ {"B_ROW3", {1, 19}, 5, 8},
     /* r5c9 */ {"P3", {1, 20}, 5, 9},
 
     /* r6c6 */ {"T_ROW2", {1, 3}, 6, 6},
-    /* r6c7 */ {"BRIGHT +", {1, 9}, 6, 7},
+    /* r6c7 */ {"BRIGHT+", {1, 9}, 6, 7},
     /* r6c8 */ {"B_ROW2", {1, 17}, 6, 8},
     /* r6c9 */ {"P2", {1, 18}, 6, 9},
 
@@ -204,22 +205,26 @@ void debounceAndReport(const bool raw[5][2])
 void setup()
 {
   Serial.begin(115200);
-  delay(100);
+  delay(5000);
   Serial.println("DB10: polling TCA + single-LED-per-button on top & bottom");
 
   // LED strips
   strip_top.begin();
   strip_top.show();
-  strip_top.setBrightness(128);
+  strip_top.setBrightness(LED_BRIGHTNESS);
   strip_bottom.begin();
   strip_bottom.show();
-  strip_bottom.setBrightness(128);
+  strip_bottom.setBrightness(LED_BRIGHTNESS);
 
   // Init all mapped LEDs to idle
   for (uint8_t i = 0; i < 10; ++i)
     setIdle(TOP_MAP[i].led);
   for (uint8_t i = 0; i < 38; ++i)
     setIdle(BOTTOM_MAP[i].led);
+  showLEDs();
+
+  // Turn off home button led
+  setLED({1, 25}, 0, 0, 0);
   showLEDs();
 
   // TCA bring-up
