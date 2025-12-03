@@ -2,6 +2,7 @@
 #include <Adafruit_DotStar.h>
 #include "pico/bootrom.h"
 #include <Adafruit_TCA8418.h>
+#include <string.h>
 
 void enter_bootsel()
 {
@@ -17,6 +18,8 @@ void enter_bootsel()
 #define BOTTOM_DATAPIN 14  // GP14
 #define BOTTOM_CLOCKPIN 15 // GP15
 #define LED_BRIGHTNESS 64  // 0-255
+
+uint8_t currentBrightness = LED_BRIGHTNESS;
 
 Adafruit_DotStar strip_top(TOP_NUM_LEDS, TOP_DATAPIN, TOP_CLOCKPIN, DOTSTAR_BRG);
 Adafruit_DotStar strip_bottom(BOTTOM_NUM_LEDS, BOTTOM_DATAPIN, BOTTOM_CLOCKPIN, DOTSTAR_BRG);
@@ -211,10 +214,10 @@ void setup()
   // LED strips
   strip_top.begin();
   strip_top.show();
-  strip_top.setBrightness(LED_BRIGHTNESS);
+  strip_top.setBrightness(currentBrightness);
   strip_bottom.begin();
   strip_bottom.show();
-  strip_bottom.setBrightness(LED_BRIGHTNESS);
+  strip_bottom.setBrightness(currentBrightness);
 
   // Init all mapped LEDs to idle
   for (uint8_t i = 0; i < 10; ++i)
@@ -292,6 +295,29 @@ void loop()
           Serial.print(row);
           Serial.print(F(" col="));
           Serial.println(col);
+
+          // Handle brightness changes on press
+          if (isPress)
+          {
+            if (strcmp(def.name, "BRIGHT+") == 0)
+            {
+              if (currentBrightness <= 255 - 16)
+                currentBrightness += 16;
+              else
+                currentBrightness = 255;
+              strip_top.setBrightness(currentBrightness);
+              strip_bottom.setBrightness(currentBrightness);
+            }
+            else if (strcmp(def.name, "BRIGHT-") == 0)
+            {
+              if (currentBrightness >= 16)
+                currentBrightness -= 16;
+              else
+                currentBrightness = 0;
+              strip_top.setBrightness(currentBrightness);
+              strip_bottom.setBrightness(currentBrightness);
+            }
+          }
 
           if (isPress)
             setActive(def.led);
