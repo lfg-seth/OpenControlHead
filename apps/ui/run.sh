@@ -32,10 +32,6 @@ export XAUTHORITY=/home/setheth/.Xauthority
 
 echo "=== Setting up CAN interface (can0 @ 250000) ==="
 
-# Try to configure and bring can0 up. Ignore errors on 'down' in case it doesn't exist yet.
-sudo ip link set can0 down 2>/dev/null || true
-sudo ip link set can0 type can bitrate 250000 || true
-sudo ip link set can0 up || true
 
 # Verify that can0 exists and is UP
 if ip link show can0 &>/dev/null; then
