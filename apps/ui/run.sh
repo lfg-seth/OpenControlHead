@@ -32,11 +32,13 @@ export DISPLAY=:0
 export XAUTHORITY=/home/setheth/.Xauthority
 
 
-# Verify Can bus is available
-if ! ip link show can0 &>/dev/null; then
+# Verify Can bus is available and the state is up
+
+echo "=== Setting up CAN interface ==="
+
 # For a real CAN adapter on can0
 sudo ip link set can0 down 2>/dev/null || true
-sudo ip link set can0 type can bitrate 500000
+sudo ip link set can0 type can bitrate 250000
 sudo ip link set can0 up
 
 fi
