@@ -470,6 +470,16 @@ class PCMDevice:
         payload = bytes([channel & 0xFF, 0x00, 0x00])
         self._send_pcm_control(SUBJECT_PCM_SINGLE_CMD, payload)
 
+    def toggle_macro(self, macro_index: int) -> None:
+        """
+        Convenience: toggle macro state.
+        """
+        macro = self.macros[macro_index]
+        if macro.requested_on:
+            self.set_macro_off(macro_index)
+        else:
+            self.set_macro_on(macro_index)
+
     def toggle_channel(self, channel: int) -> None:
         """
         Request: toggle channel state (command 0x02).
@@ -669,6 +679,17 @@ class PCMMacro:
         def on(self) -> None:
             """Request to turn this macro ON."""
             self.pcm.set_macro_on(self.index)
+
+        def off(self) -> None:
+            """Request to turn this macro OFF."""
+            self.pcm.set_macro_off(self.index)
+
+        def toggle(self) -> None:
+            """Convenience toggle using the parent PCMDevice."""
+            if self.requested_on:
+                self.pcm.set_macro_off(self.index)
+            else:
+                self.pcm.set_macro_on(self.index)
 
 class PCMChannel:
     """
