@@ -109,8 +109,8 @@ class Bridge(QObject):
 
         # Optional mapping for future physical buttons -> logical switches
         self._button_map: dict[str, str] = {
-            "LIGHT": "Front Lights",
-            "HORN": "Flashers",
+            "LIGHT_FRONT": "Front Lights",
+            "HORN": "Horn",
         }
 
     # ---------- internals ----------
