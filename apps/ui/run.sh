@@ -1,55 +1,58 @@
 #!/usr/bin/env bash
 set -e  # Exit on any error
 
-REPO_DIR="$(pwd)"
-VENV_DIR="$REPO_DIR/.venv"
+echo "=== o9-control-head startup ==="
+echo "=== Waiting for X display :0 ==="
+for i in {1..10}; do
+  if DISPLAY=:0 xhost >/dev/null 2>&1; then
+    echo "=== X display is ready ==="
+    break
+  fi
+  echo "X not ready yet, retrying..."
+  sleep 1
+done
 
-echo "=== Updating repository ==="
-git pull --rebase
+# Absolute paths so systemd can't confuse us
+REPO_ROOT="/home/setheth/dev/OpenControlHead"
+APP_DIR="$REPO_ROOT/apps/ui"
+VENV_DIR="$REPO_ROOT/apps/ui/.venv"
 
-# Create venv if missing
-if [ ! -d "$VENV_DIR" ]; then
-  echo "=== Creating virtual environment ==="
-  python3 -m venv "$VENV_DIR"
-fi
+cd "$APP_DIR"
 
-# Activate venv
+echo "=== Using repo root: $REPO_ROOT ==="
+echo "=== Using app dir : $APP_DIR ==="
+echo "=== Using venv    : $VENV_DIR ==="
+
 echo "=== Activating virtual environment ==="
-# shellcheck source=/dev/null
-source "$VENV_DIR/bin/activate"
+if [ ! -d "$VENV_DIR" ]; then
+  echo "=== Creating virtual environment at $VENV_DIR ==="
+  python3 -m venv "$VENV_DIR"
 
-# Install dependencies if missing
-REQ_PYSIDE="PySide6"
-if ! python -c "import ${REQ_PYSIDE}" &>/dev/null; then
-  echo "=== Installing dependencies ==="
+  # shellcheck source=/dev/null
+  source "$VENV_DIR/bin/activate"
+
+  echo "=== Installing dependencies (first time) ==="
   pip install -U pip
+  cd "$REPO_ROOT"
   pip install -e .
+  cd "$APP_DIR"
+else
+  # shellcheck source=/dev/null
+  source "$VENV_DIR/bin/activate"
+
+  # Only reinstall deps if PySide6 is missing
+  if ! python -c "import PySide6" &>/dev/null; then
+    echo "=== Installing dependencies (PySide6 missing) ==="
+    pip install -U pip
+    cd "$REPO_ROOT"
+    pip install -e .
+    cd "$APP_DIR"
+  fi
 fi
 
-echo "=== Running o9-control-head ==="
+echo "=== Setting display env ==="
 export DISPLAY=:0
 export XAUTHORITY=/home/setheth/.Xauthority
 
-echo "=== Setting up CAN interface (can0 @ 250000) ==="
-
-
-# Verify that can0 exists and is UP
-if ip link show can0 &>/dev/null; then
-  # Sample output fragment:
-  # 3: can0: <NOARP,ECHO> mtu 16 qdisc noop state DOWN mode DEFAULT group default qlen 10
-  # We just care that the line contains "state UP"
-  if ip -o link show can0 | grep -q "state UP"; then
-    echo "=== CAN interface can0 is UP ==="
-  else
-    echo "!!! ERROR: can0 exists but is not UP. Current status:"
-    ip -o link show can0
-    echo "Exiting so the app doesn't crash with 'Network is down'."
-    exit 1
-  fi
-else
-  echo "!!! ERROR: can0 interface does not exist."
-  echo "Make sure your CAN adapter is plugged in / configured, then rerun this script."
-  exit 1
-fi
-
-python run.py
+echo "=== Launching UI ==="
+exec python run.py
