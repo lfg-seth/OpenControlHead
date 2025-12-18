@@ -38,11 +38,11 @@ lightbar = front_pcm.init_channel(5, label="Lightbar")
 rock_lights_bumper = front_pcm.init_channel(6, label="Rock Lights Bumper")
 rock_lights_rear = rear_pcm.init_channel(8, label="Rock Lights Rear")
 
-front_flashers_low = front_pcm.init_channel(32, label="Front Flashers")
-rear_flashers_low  = rear_pcm.init_channel(34, label="Rear Flashers")
+front_flashers_low = front_pcm.init_channel(31, label="Front Flashers Low")
+rear_flashers_low  = rear_pcm.init_channel(33, label="Rear Flashers Low")
 
-front_flashers_high = front_pcm.init_channel(31, label="Front Flashers High")
-rear_flashers_high  = rear_pcm.init_channel(33, label="Rear Flashers High")
+front_flashers_high = front_pcm.init_channel(32, label="Front Flashers High")
+rear_flashers_high  = rear_pcm.init_channel(34, label="Rear Flashers High")
 
 fog_lights = front_pcm.init_channel(2, label="Fog Lights")
 
@@ -50,7 +50,7 @@ switches = SwitchManager()
 
 Front_lights = switches.add(
     LogicalSwitch(
-        name="Front Lights Low",
+        name="Front Lights",
         type=SwitchType.CYCLE,
         channels=[grill_lp4_low, grill_lp6_low, grill_lp6_high, grill_lp4_high, lightbar],
         cycles=[
@@ -71,6 +71,7 @@ Flashers_front = switches.add(
         cycles=[
             [front_flashers_low],
             [front_flashers_high],
+            []
         ],
     )
 )
@@ -83,6 +84,7 @@ Flashers_rear = switches.add(
         cycles=[
             [rear_flashers_low],
             [rear_flashers_high],
+            []
         ],
     )
 )
