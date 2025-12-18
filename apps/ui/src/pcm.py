@@ -292,7 +292,7 @@ class PCMDevice:
     This class does NOT know about Qt; keep it pure logic so it’s testable.
     """
 
-    NUM_CHANNELS = 26
+    NUM_CHANNELS = 64
 
     def __init__(
         self,
