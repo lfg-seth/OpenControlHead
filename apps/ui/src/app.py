@@ -28,40 +28,62 @@ front_pcm = pcm_mgr.add_pcm(node_id=1, name="Front PCM")
 rear_pcm  = pcm_mgr.add_pcm(node_id=2, name="Rear PCM")
 
 # Define channels by what they actually go to
-front_light_left  = front_pcm.init_channel(0, label="Front Light Left")
-front_light_right = front_pcm.init_channel(1, label="Front Light Right")
-grill_light       = front_pcm.init_channel(2, label="Grill Light")
-horn_ch = front_pcm.init_channel(3, label="Horn")
-front_flashers = front_pcm.init_macro(0, label="Front Flashers")
+grill_lp6_low  = front_pcm.init_channel(14, label="Grill LP6 Light Low")
+grill_lp6_high = front_pcm.init_channel(13, label="Grill LP6 Light High")
+grill_lp4_low  = front_pcm.init_channel(16, label="Grill LP4 Light Low")
+grill_lp4_high = front_pcm.init_channel(15, label="Grill LP4 Light High")
+
+grill_amber = front_pcm.init_channel(19, label="Grill Amber Light") 
+lightbar = front_pcm.init_channel(5, label="Lightbar")
+rock_lights_bumper = front_pcm.init_channel(6, label="Rock Lights Bumper")
+rock_lights_rear = rear_pcm.init_channel(8, label="Rock Lights Rear")
+
+front_flashers_low = front_pcm.init_channel(32, label="Front Flashers")
+rear_flashers_low  = rear_pcm.init_channel(34, label="Rear Flashers")
+
+front_flashers_high = front_pcm.init_channel(31, label="Front Flashers High")
+rear_flashers_high  = rear_pcm.init_channel(33, label="Rear Flashers High")
+
+fog_lights = front_pcm.init_channel(2, label="Fog Lights")
+
 switches = SwitchManager()
 
 Front_lights = switches.add(
     LogicalSwitch(
-        name="Front Lights",
+        name="Front Lights Low",
         type=SwitchType.CYCLE,
-        channels=[front_light_left, front_light_right, grill_light],
+        channels=[grill_lp4_low, grill_lp6_low, grill_lp6_high, grill_lp4_high, lightbar],
         cycles=[
-            [],
-            [front_light_left],
-            [front_light_left, front_light_right],
-            [front_light_left, front_light_right, grill_light],
+            [grill_lp4_low],
+            [grill_lp6_low, grill_lp4_low],
+            [grill_lp6_high, grill_lp4_high, lightbar],
         ],
     )
 )
 
-Horn = switches.add(
+
+
+Flashers_front = switches.add(
     LogicalSwitch(
-        name="Horn",
-        type=SwitchType.MOMENTARY,
-        channels=[horn_ch],
+        name="Front Flashers",
+        type=SwitchType.CYCLE,
+        channels=[front_flashers_low, front_flashers_high],
+        cycles=[
+            [front_flashers_low],
+            [front_flashers_high],
+        ],
     )
 )
 
-Flashers = switches.add(
+Flashers_rear = switches.add(
     LogicalSwitch(
-        name="Flashers",
-        type=SwitchType.TOGGLE,
-        channels=[front_flashers],
+        name="Rear Flashers",
+        type=SwitchType.CYCLE,
+        channels=[rear_flashers_low, rear_flashers_high],
+        cycles=[
+            [rear_flashers_low],
+            [rear_flashers_high],
+        ],
     )
 )
 
@@ -110,7 +132,8 @@ class Bridge(QObject):
         # Optional mapping for future physical buttons -> logical switches
         self._button_map: dict[str, str] = {
             "LIGHT_FRONT": "Front Lights",
-            "HORN": "Horn",
+            "LIGHT_LEFT": "Front Flashers",
+            "LIGHT_RIGHT": "Rear Flashers",
         }
 
     # ---------- internals ----------
