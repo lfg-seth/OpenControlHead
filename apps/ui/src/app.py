@@ -54,10 +54,11 @@ Front_lights = switches.add(
         type=SwitchType.CYCLE,
         channels=[grill_lp4_low, grill_lp6_low, grill_lp6_high, grill_lp4_high, lightbar],
         cycles=[
+            [],
             [grill_lp4_low],
             [grill_lp6_low, grill_lp4_low],
             [grill_lp6_high, grill_lp4_high, lightbar],
-            []
+            
         ],
     )
 )
@@ -70,9 +71,10 @@ Flashers_front = switches.add(
         type=SwitchType.CYCLE,
         channels=[front_flashers_low, front_flashers_high],
         cycles=[
+            [],
             [front_flashers_low],
             [front_flashers_high],
-            []
+            
         ],
     )
 )
@@ -83,9 +85,10 @@ Flashers_rear = switches.add(
         type=SwitchType.CYCLE,
         channels=[rear_flashers_low, rear_flashers_high],
         cycles=[
+            [],
             [rear_flashers_low],
             [rear_flashers_high],
-            []
+            
         ],
     )
 )
